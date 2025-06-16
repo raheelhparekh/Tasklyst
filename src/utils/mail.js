@@ -1,12 +1,13 @@
 import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
 
-const sendMail = async (options) => {
+export const sendMail = async (options) => {
   var mailGenerator = new Mailgen({
     theme: "default",
     product: {
       // Appears in header & footer of e-mails
       name: "Task Manager",
+      link: process.env.BASE_URL || "http://localhost:8000",
     },
   });
 
@@ -18,11 +19,11 @@ const sendMail = async (options) => {
 
   // Create a transporter for SMTP
   const transporter = nodemailer.createTransport({
-    host: process.env.MAILTRAP.USERNAME,
-    port: process.env.MAILTRAP.PORT,
+    host: process.env.MAILTRAP_HOST,
+    port: process.env.MAILTRAP_PORT,
     secure: false, // upgrade later with STARTTLS
     auth: {
-      user: process.env.MAILTRAP_USER,
+      user: process.env.MAILTRAP_USERNAME,
       pass: process.env.MAILTRAP_PASSWORD,
     },
   });
@@ -43,7 +44,7 @@ const sendMail = async (options) => {
   }
 };
 
-const emailVerificationMailGenContent = (username, verificationUrl) => {
+export const emailVerificationMailGenContent = (username, verificationUrl) => {
   return {
     body: {
       name: username,
@@ -63,7 +64,7 @@ const emailVerificationMailGenContent = (username, verificationUrl) => {
   };
 };
 
-const forgotPasswordMailGenContent = (username, passwordResetUrl) => {
+export const forgotPasswordMailGenContent = (username, passwordResetUrl) => {
   return {
     body: {
       name: username,

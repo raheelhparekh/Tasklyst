@@ -1,7 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import crypto from "crypto"
+import crypto from "crypto";
+import { AvailableUserRolesEnum, UserRolesEnums } from "../utils/constants.js";
 
 const userSchema = new Schema(
   {
@@ -37,6 +38,11 @@ const userSchema = new Schema(
     isEmailVerified: {
       type: Boolean,
       default: "false",
+    },
+    role: {
+      type: String,
+      enum: AvailableUserRolesEnum, // array hona chahiye
+      default: UserRolesEnums.MEMBER, // default role
     },
 
     forgotPasswordToken: {
@@ -99,15 +105,18 @@ userSchema.methods.generateRefreshToken = async function () {
   );
 };
 
-// generating random token to verify email 
-userSchema.methods.generateTemporaryToken=async function(){
-    const unHashedToken= crypto.randomBytes(20).toString("hex")
+// generating random token to verify email
+userSchema.methods.generateTemporaryToken = async function () {
+  const unHashedToken = crypto.randomBytes(20).toString("hex");
 
-    const hashedToken=crypto.createHash("sha256").update(unHashedToken).digest("hex")
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(unHashedToken)
+    .digest("hex");
 
-    const tokenExpiry=Date.now()+(20*60*1000) // 20 minutes
+  const tokenExpiry = Date.now() + 20 * 60 * 1000; // 20 minutes
 
-    return {hashedToken,unHashedToken,tokenExpiry}
-}
+  return { hashedToken, unHashedToken, tokenExpiry };
+};
 
 export const User = mongoose.model("User", userSchema);

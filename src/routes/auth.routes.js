@@ -1,11 +1,15 @@
 import { Router } from "express";
-import { userRegistrationValidator } from "../validators";
-import { validate } from "../middlewares/validator.middlewares";
-import { registerUser } from "../controllers/auth.controllers";
+import { userRegistrationValidator,userLoginValidator } from "../validators/index.js";
+import { validate } from "../middlewares/validator.middlewares.js";
+import { getUser, loginUser, logoutUser, registerUser } from "../controllers/auth.controllers.js";
+import { isLoggedIn } from "../middlewares/auth.middlewares.js";
 
-const router= Router()
+const authRoutes= Router()
 
-router.post("/register",userRegistrationValidator(),validate,registerUser)
+authRoutes.post("/register",userRegistrationValidator(),validate,registerUser)
+authRoutes.post("/login",userLoginValidator(),validate,loginUser)
+authRoutes.get("/logout",isLoggedIn,logoutUser)
+authRoutes.get("/profile",isLoggedIn,getUser)
 
 
-export default router
+export default authRoutes
