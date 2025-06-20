@@ -51,7 +51,7 @@ export const emailVerificationMailGenContent = (username, verificationUrl) => {
       intro:
         "Welcome to Task Manager! We're very excited to have you on board.",
       action: {
-        instructions: "To get started with our app, please click here:",
+        instructions: "To get started with our app, please click here to verify your email:",
         button: {
           color: "#22BC66", // Optional action button color
           text: "Confirm your account",

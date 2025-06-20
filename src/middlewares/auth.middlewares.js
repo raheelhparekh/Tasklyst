@@ -17,9 +17,13 @@ export const isLoggedIn = async (req, res, next) => {
     // CASE 1: Access token exists
     if (accessToken) {
       try {
-        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+        const decoded = jwt.verify(
+          accessToken,
+          process.env.ACCESS_TOKEN_SECRET,
+        );
         user = await User.findById(decoded._id);
-        if (!user) throw new ApiError(401, "No user found with this access token.");
+        if (!user)
+          throw new ApiError(401, "No user found with this access token.");
       } catch (err) {
         // If access token fails, try refresh token fallback
         if (!refreshToken) {
@@ -31,9 +35,13 @@ export const isLoggedIn = async (req, res, next) => {
     // CASE 2: Access token missing or invalid, use refresh token
     if (!user && refreshToken) {
       try {
-        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+        const decoded = jwt.verify(
+          refreshToken,
+          process.env.REFRESH_TOKEN_SECRET,
+        );
         user = await User.findById(decoded._id);
-        if (!user) throw new ApiError(401, "No user found with this refresh token.");
+        if (!user)
+          throw new ApiError(401, "No user found with this refresh token.");
 
         // Generate new tokens
         const newAccessToken = await user.generateAccessToken();
