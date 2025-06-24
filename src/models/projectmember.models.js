@@ -1,22 +1,23 @@
-import mongoose from "mongoose";
-import {AvailableUserRolesEnum, UserRolesEnums} from "../utils/constants.js"
+import mongoose,{Schema} from "mongoose";
+import { AvailableUserRolesEnum, UserRolesEnums } from "../utils/constants.js";
 
 const projectMemberSchema = new Schema(
   {
     user: {
-      type: Schema.Types.Objectid,
+      type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     project: {
       type: Schema.Types.ObjectId,
       ref: "Project",
       required: true,
     },
-    role:{
-        type:String,
-        enum:AvailableUserRolesEnum,
-        default:UserRolesEnums.MEMBER
-    }
+    role: {
+      type: String,
+      enum: AvailableUserRolesEnum,
+      default: UserRolesEnums.MEMBER,
+    },
   },
   {
     timestamps: true,
