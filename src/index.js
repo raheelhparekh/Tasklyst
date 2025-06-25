@@ -1,10 +1,14 @@
 import dotenv from "dotenv";
 import app from "./app.js";
 import connectDb from "./db/db.js";
-import authRoutes from "./routes/auth.routes.js"
 import cookieParser from "cookie-parser";
 import cors from "cors"
 import express from "express"
+
+import authRoutes from "./routes/auth.routes.js"
+import projectRoutes from "./routes/project.routes.js";
+import noteRoutes from "./routes/note.routes.js";
+
 
 dotenv.config({
   path: "./.env",
@@ -24,6 +28,9 @@ app.use(cookieParser())
 const PORT = process.env.PORT || 8000;
 
 app.use("/api/v1/auth",authRoutes)
+app.use("/api/v1/project", projectRoutes);
+app.use("/api/v1/note", noteRoutes);
+
 
 connectDb()
   .then(() => {

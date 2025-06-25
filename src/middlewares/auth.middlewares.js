@@ -1,6 +1,9 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/api-errors.js";
+import { asyncHandler } from "../utils/async-handler.js";
+import { ProjectMember } from "../models/projectmember.models.js";
+import mongoose from "mongoose";
 
 export const isLoggedIn = async (req, res, next) => {
   try {
@@ -71,3 +74,45 @@ export const isLoggedIn = async (req, res, next) => {
     });
   }
 };
+
+export const validateProjectPermission = (roles = []) =>
+  asyncHandler(async (req, res, next) => {
+    try {
+      const { projectId } = req.params;
+      console.log("user id", req.user._id);
+      if (!projectId) {
+        throw new ApiError(400, "Project ID is required");
+      }
+
+      const projectMember = await ProjectMember.findOne({
+        project: new mongoose.Types.ObjectId(projectId),
+        user: new mongoose.Types.ObjectId(req.user.id),
+      });
+      console.log("Project Member:", projectMember);
+
+      if (!projectMember) {
+        throw new ApiError(403, "project not found in middleware");
+      }
+
+      const givenRole = projectMember?.role;
+      console.log("Given Role:", givenRole);
+
+      req.user.role = givenRole;
+
+      if (!roles.includes(givenRole)) {
+        throw new ApiError(
+          403,
+          "You do not have permission to perform this action",
+        );
+      }
+
+      next();
+    
+    } catch (error) {
+      console.error("Error in validateProjectPermission middleware:", error);
+      throw new ApiError(
+        500,
+        "Internal server error while validating project permission.",
+      );
+    }
+});
