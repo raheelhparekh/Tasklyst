@@ -1,7 +1,7 @@
 {
   "name": "task-management",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "./src/index.js",
   "type": "module",
   "scripts": {
     "start": "nodemon index.js"
