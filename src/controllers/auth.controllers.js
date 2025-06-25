@@ -1,5 +1,9 @@
 import { asyncHandler } from "../utils/async-handler.js";
-import { emailVerificationMailGenContent, forgotPasswordMailGenContent, sendMail } from "../utils/mail.js";
+import {
+  emailVerificationMailGenContent,
+  forgotPasswordMailGenContent,
+  sendMail,
+} from "../utils/mail.js";
 import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/api-errors.js";
 import { ApiResponse } from "../utils/api-response.js";
@@ -323,7 +327,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-    
+
     user.forgotPasswordToken = undefined;
     user.forgotPasswordExpiry = undefined;
     await user.save();
@@ -341,6 +345,45 @@ const resetPassword = asyncHandler(async (req, res) => {
   }
 });
 
+const updateUserProfile = asyncHandler(async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    const user = req.user;
+    if (!user) {
+      throw new ApiError(401, "Unauthorized access.");
+    }
+
+    const myUser = await User.findById(user._id).select("-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry -refreshToken");
+    
+    if (!myUser) {
+      throw new ApiError(404, "User not found.");
+    }
+
+    // Update user profile
+    if (username) {
+      myUser.username = username || myUser.username;
+    }
+
+    if (req.file && req.file.path) {
+      myUser.avatar.url = req.file.path; // Cloudinary URL
+      console.log("Avatar URL:", myUser.avatar.url);
+    }
+    await myUser.save();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, myUser, "Profile updated successfully."));
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    throw new ApiError(
+      500,
+      "Internal server error while updating profile.",
+      error,
+    );
+  }
+});
+
 export {
   registerUser,
   loginUser,
@@ -350,4 +393,5 @@ export {
   resendVerificationEmail,
   forgotPassword,
   resetPassword,
+  updateUserProfile,
 };
