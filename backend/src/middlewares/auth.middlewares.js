@@ -9,10 +9,12 @@ export const isLoggedIn = async (req, res, next) => {
   try {
     const { accessToken, refreshToken } = req.cookies || {};
 
+    const isProduction = process.env.NODE_ENV === "production";
     const cookieOptions = {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: isProduction, // false in dev, true in prod
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      sameSite: isProduction ? "strict" : "lax", // lax allows smoother local dev
     };
 
     let user;

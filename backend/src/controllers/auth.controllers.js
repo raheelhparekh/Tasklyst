@@ -23,7 +23,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("hashed pass", hashedPassword);
+    // console.log("hashed pass", hashedPassword);
 
     // create new user
     const newUser = await User.create({
@@ -53,6 +53,8 @@ const registerUser = asyncHandler(async (req, res) => {
         `${process.env.BASE_URL}/api/v1/auth/verify-email?token=${unHashedToken}`,
       ),
     });
+
+    console.log("email sent");
 
     return res.status(200).json(
       new ApiResponse(
@@ -97,16 +99,20 @@ const loginUser = asyncHandler(async (req, res) => {
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      secure: isProduction, // false in dev, true in prod
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      sameSite: isProduction ? "strict" : "lax", // lax allows smoother local dev
     });
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      secure: isProduction,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      sameSite: isProduction ? "strict" : "lax",
     });
 
     user.refreshToken = refreshToken;
@@ -282,6 +288,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     // sending email to the user
     console.log("sending email");
+    
     await sendMail({
       email: user.email, // ✅ required
       subject: "Reset your password", // ✅ required
@@ -290,6 +297,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
         `${process.env.BASE_URL}/api/v1/auth/reset-password/${unHashedToken}`,
       ),
     });
+    
     console.log("email sent");
 
     return res
@@ -354,8 +362,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Unauthorized access.");
     }
 
-    const myUser = await User.findById(user._id).select("-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry -refreshToken");
-    
+    const myUser = await User.findById(user._id).select(
+      "-password -emailVerificationToken -emailVerificationExpiry -forgotPasswordToken -forgotPasswordExpiry -refreshToken",
+    );
+
     if (!myUser) {
       throw new ApiError(404, "User not found.");
     }
@@ -384,6 +394,17 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+const check = async (req, res) => {
+  try {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, req.user, "You are authenticated."));
+  } catch (error) {
+    console.error("Error in checking auth:", error);
+    throw new ApiError(500, "Internal server error in check auth.", error);
+  }
+};
+
 export {
   registerUser,
   loginUser,
@@ -394,4 +415,5 @@ export {
   forgotPassword,
   resetPassword,
   updateUserProfile,
+  check,
 };

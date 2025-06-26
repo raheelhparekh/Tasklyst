@@ -8,6 +8,7 @@ import {
 } from "../validators/index.js";
 import { validate } from "../middlewares/validator.middlewares.js";
 import {
+  check,
   forgotPassword,
   getUser,
   loginUser,
@@ -35,5 +36,7 @@ authRoutes.post("/forgot-password", forgotPasswordRequestValidator(), validate, 
 authRoutes.post("/reset-password/:token", resetPasswordValidator(), validate, resetPassword);
 
 authRoutes.post("/update-profile", isLoggedIn, upload.single('avatar') ,updateUserProfile);
+
+authRoutes.get("/check-auth", isLoggedIn, check);
 
 export default authRoutes;
