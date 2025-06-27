@@ -7,11 +7,16 @@ import { ProjectMember } from "../models/projectmember.models.js";
 // get all projects of user
 const getAllProjectsOfUser = asyncHandler(async (req, res) => {
   try {
-    const projects = await Project.find({ createdBy: req.user.id });
+    const projects = await Project.find({ createdBy: req.user.id })
+      .select("name description createdBy") // only return these fields
+      .populate("createdBy", "username email avatar"); // populate only these fields from User;
+
+    // console.log("projects from backend:", projects);
+
     if (!projects || projects.length === 0) {
       throw new ApiError(404, "No projects found for this user");
     }
-    
+
     return res
       .status(200)
       .json(
@@ -71,8 +76,7 @@ const createProject = asyncHandler(async (req, res) => {
     return res
       .status(201)
       .json(new ApiResponse(201, project, "Project created successfully."));
-  
-    } catch (error) {
+  } catch (error) {
     console.error("Error creating project:", error);
     throw new ApiError(500, "Internal server error while creating project.");
   }
@@ -178,17 +182,23 @@ const getProjectMembers = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Please provide a valid project id");
     }
 
-    const membersCount = await ProjectMember.countDocuments({ project: projectId })
+    const membersCount = await ProjectMember.countDocuments({
+      project: projectId,
+    });
     console.log(`total project member count in ${projectId}: ${membersCount}`);
 
-    if (!membersCount || membersCount.length === 0) {
-      throw new ApiError(404, "No members found for this project");
-    }
+    // if (!membersCount || membersCount.length === 0) {
+    //   throw new ApiError(404, "No members found for this project");
+    // }
 
     return res
       .status(200)
       .json(
-        new ApiResponse(200, membersCount, "Project members found successfully."),
+        new ApiResponse(
+          200,
+          membersCount,
+          "Project members found successfully.",
+        ),
       );
   } catch (error) {
     console.error("Error getting project members:", error);
@@ -218,16 +228,18 @@ const updateMemberRole = asyncHandler(async (req, res) => {
     return res
       .status(200)
       .json(
-        new ApiResponse(200, member, "Project member role updated successfully."),
+        new ApiResponse(
+          200,
+          member,
+          "Project member role updated successfully.",
+        ),
       );
-    
   } catch (error) {
     console.error("Error updating project members:", error);
     throw new ApiError(
       500,
       "Internal server error while updating project members.",
     );
-    
   }
 });
 
@@ -235,13 +247,13 @@ const updateMemberRole = asyncHandler(async (req, res) => {
 const deleteProjectMember = asyncHandler(async (req, res) => {
   try {
     const { id: memberId } = req.params;
-    
+
     if (!memberId) {
       throw new ApiError(400, "Please provide a valid member id");
     }
 
     const member = await ProjectMember.findByIdAndDelete(memberId);
-    
+
     if (!member) {
       throw new ApiError(404, "Project member with id not found");
     }
