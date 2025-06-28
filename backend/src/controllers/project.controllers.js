@@ -8,7 +8,7 @@ import { ProjectMember } from "../models/projectmember.models.js";
 const getAllProjectsOfUser = asyncHandler(async (req, res) => {
   try {
     const projects = await Project.find({ createdBy: req.user.id })
-      .select("name description createdBy") // only return these fields
+      .select("name description createdBy createdAt") // only return these fields
       .populate("createdBy", "username email avatar"); // populate only these fields from User;
 
     // console.log("projects from backend:", projects);
@@ -64,14 +64,19 @@ const createProject = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Please provide all required fields");
     }
 
-    const project = await Project.create({
+    const projectCreated = await Project.create({
       name,
       description,
       createdBy: req.user.id,
     });
-    if (!project) {
+
+    if (!projectCreated) {
       throw new ApiError(400, "Project creation failed.");
     }
+
+    const project = await Project.findById(projectCreated._id)
+      .select("name description createdBy createdAt")
+      .populate("createdBy", "username email avatar");
 
     return res
       .status(201)
@@ -91,14 +96,18 @@ const updateProject = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Please provide a valid id");
     }
 
-    const project = await Project.findById(id);
+    const projectUpdated = await Project.findById(id);
     if (!project) {
       throw new ApiError(404, "Project with id not found");
     }
 
-    project.name = name;
-    project.description = description;
-    await project.save();
+    projectUpdated.name = name;
+    projectUpdated.description = description;
+    await projectUpdated.save();
+
+    const project = await Project.findById(projectUpdated._id)
+      .select("name description createdBy createdAt")
+      .populate("createdBy", "username email avatar");
 
     return res
       .status(200)
@@ -185,7 +194,7 @@ const getProjectMembers = asyncHandler(async (req, res) => {
     const membersCount = await ProjectMember.countDocuments({
       project: projectId,
     });
-    console.log(`total project member count in ${projectId}: ${membersCount}`);
+    // console.log(`total project member count in ${projectId}: ${membersCount}`);
 
     // if (!membersCount || membersCount.length === 0) {
     //   throw new ApiError(404, "No members found for this project");

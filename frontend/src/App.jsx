@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import ProjectPage from "./pages/ProjectPage";
 import TaskPage from "./pages/TaskPage";
 import SignupPage from "./pages/SignupPage";
@@ -10,6 +8,7 @@ import { useAuthStore } from "./store/useAuthStore.js";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
+import Layout from "./components/Layout";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -27,31 +26,25 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-start">
-      <Routes>
-        {/* <Route path="/" element={<Layout />}>
-            <Route
-              index
-              element={authUser ? <HomePage /> : <Navigate to={"/login"} />}
-            />
-          </Route> */}
-        <Route path="/" element={<HomePage />} />
-
-        <Route
-          path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
-        />
-        <Route
-          path="/signup"
-          element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
-        />
-
+    <Routes>
+      {/* Layout-wrapped routes */}
+      <Route path="/" element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="/task" element={<TaskPage />} />
+        <Route path="/project" element={<ProjectPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+      </Route>
 
-        <Route path="/projects" element={<ProjectPage />} />
-        <Route path="/tasks" element={<TaskPage />} />
-      </Routes>
-    </div>
+      {/* Standalone pages (like auth) */}
+      <Route
+        path="/login"
+        element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
+      />
+      <Route
+        path="/signup"
+        element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
+      />
+    </Routes>
   );
 }
 
