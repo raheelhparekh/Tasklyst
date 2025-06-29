@@ -17,14 +17,14 @@ import { User } from "../models/user.models.js";
 
 const createTask = asyncHandler(async (req, res) => {
   try {
-    const { title, description, email, attachments } = req.body;
+    const { title, description, email, status, priority, attachments } = req.body;
     const { projectId } = req.params;
 
     const user = req.user;
     // console.log("user",user);
     console.log("this task is created by user name:", user.username);
 
-    if (!title || !email) {
+    if (!title || !email  || !priority) {
       throw new ApiError(400, "Title, Assigned To are required fields.");
     }
 
@@ -37,6 +37,9 @@ const createTask = asyncHandler(async (req, res) => {
       description,
       project: projectId,
       assignedTo: userAssignedTo,
+      status: status || "TODO", // Default status is TODO
+      priority: priority || "Medium", // Default priority is Medium
+      dueDate: null, // Default due date is null
       assignedBy: user,
       attachments: attachments || [],
     });
@@ -75,7 +78,7 @@ const updateTask = asyncHandler(async (req, res) => {
     // Check if the user is authorized to update the task , only the creator can update or the project admin
     if (
       task.assignedBy.toString() !== req.user.id &&
-      !req.user.role === "ADMIN"
+      req.user.role !== "ADMIN"
     ) {
       throw new ApiError(403, "You are not authorized to update this task");
     }
@@ -116,7 +119,7 @@ const deleteTask = asyncHandler(async (req, res) => {
     // Check if the user is authorized to delete the task, only the creator can delete or the project admin
     if (
       task.assignedBy.toString() !== req.user.id &&
-      !req.user.role === "ADMIN"
+      req.user.role !== "ADMIN"
     ) {
       throw new ApiError(403, "You are not authorized to delete this task");
     }
@@ -135,10 +138,16 @@ const deleteTask = asyncHandler(async (req, res) => {
 const getAllTasksOfProject = asyncHandler(async (req, res) => {
   try {
     const { projectId } = req.params;
+    const {status} = req.query;
 
-    const tasks = await Task.find({ project: projectId })
-      .populate("assignedTo", "name email avatar")
-      .populate("assignedBy", "name email avatar");
+    const filter = { project: projectId };
+    if (status) {
+      filter.status = status;
+    }
+
+    const tasks = await Task.find(filter)
+      .populate("assignedTo", "username email avatar")
+      .populate("assignedBy", "username email avatar");
 
     if (!tasks || tasks.length === 0) {
       throw new ApiError(404, "No tasks found for this project");
@@ -206,6 +215,7 @@ const getAllTaskAssignedToUser = asyncHandler(async (req, res) => {
     );
   }
 });
+
 
 export {
   createTask,

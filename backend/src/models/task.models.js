@@ -31,6 +31,15 @@ const taskSchema = new Schema(
       enum: AvailableTaskStatusEnum, // array hona chahiye
       default: TaskStatusEnum.TODO,
     },
+    priority: {
+      type: String,
+      enum: ["Low", "Medium", "High"],
+      default: "Medium",
+    },
+    dueDate: {
+      type: Date,
+      default: null, // null agar due date nahi hai
+    },
     attachments: {
       type: [
         {

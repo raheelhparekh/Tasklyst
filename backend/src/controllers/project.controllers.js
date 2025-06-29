@@ -279,6 +279,38 @@ const deleteProjectMember = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllProjectMembersDetails = asyncHandler(async (req, res) => {
+  try {
+    const { id: projectId } = req.params;
+    if (!projectId) {
+      throw new ApiError(400, "Please provide a valid project id");
+    }
+
+    const members = await ProjectMember.find({ project: projectId }).populate(
+      "user",
+      "username email avatar",
+    );
+
+    console.log(`Project members for ${projectId}:`, members);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          members,
+          "Project members found successfully.",
+        ),
+      );
+  } catch (error) {
+    console.error("Error getting project members:", error);
+    throw new ApiError(
+      500,
+      "Internal server error while getting project members.",
+    );
+  }
+});
+
 export {
   getAllProjectsOfUser,
   getProjectMembers,
@@ -289,4 +321,5 @@ export {
   addMemberToProject,
   createProject,
   updateProject,
+  getAllProjectMembersDetails
 };

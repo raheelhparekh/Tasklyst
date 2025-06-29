@@ -8,7 +8,9 @@ import {
     getProjectById, 
     getProjectMembers, 
     updateMemberRole, 
-    updateProject } from "../controllers/project.controllers.js";
+    updateProject,
+    getAllProjectMembersDetails
+ } from "../controllers/project.controllers.js";
 
 import { isLoggedIn } from "../middlewares/auth.middlewares.js";
 
@@ -31,5 +33,7 @@ projectRoutes.get("/get-all-members/:id", isLoggedIn, getProjectMembers);
 projectRoutes.put("/update-member-role/:id", isLoggedIn, updateMemberRole);
 
 projectRoutes.delete("/delete-member/:id", isLoggedIn, deleteProjectMember);
+
+projectRoutes.get("/get-all-members-details/:id", isLoggedIn, getAllProjectMembersDetails);
 
 export default projectRoutes;

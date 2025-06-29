@@ -46,7 +46,7 @@ export default function ProjectPage() {
       cell: ({ row }) => (
         <button
           className="text-blue-600 hover:underline"
-          onClick={() => navigate(`/project/${row.original._id}`)}
+          onClick={() => navigate(`/project/${row.original._id}/task`)}
         >
           {row.original.name}
         </button>

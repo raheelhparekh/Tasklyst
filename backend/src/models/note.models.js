@@ -5,7 +5,6 @@ const noteSchema = new Schema(
     project: {
       type: Schema.Types.ObjectId,
       ref: "Project",
-      required: true,
     },
     createdBy: {
       type: Schema.Types.ObjectId,
@@ -16,6 +15,10 @@ const noteSchema = new Schema(
       type: String,
       required: true,
     },
+    task:{
+      type: Schema.Types.ObjectId,
+      ref: "Task",
+    }
   },
   {
     timestamps: true,

@@ -30,7 +30,7 @@ function App() {
       {/* Layout-wrapped routes */}
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
-        <Route path="/task" element={<TaskPage />} />
+        <Route path="/project/:id/task" element={<TaskPage />} />
         <Route path="/project" element={<ProjectPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
