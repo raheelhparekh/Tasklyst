@@ -1,48 +1,130 @@
-// components/ProjectSidebar.jsx
 "use client";
 
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Plus, X } from "lucide-react";
+import CreateNewTask from "@/components/CreateNewTask";
+import { useProjectStore } from "@/store/useProjectStore";
+import { useEffect, useState } from "react";
 
-export default function ProjectSidebar({ projects }) {
-  const [openProjectId, setOpenProjectId] = useState(null);
+export default function ProjectSidebar({
+  onClose,
+  setActiveTab,
+  activeTab,
+  members,
+}) {
+  const { id } = useParams();
+  const { getProjectById, project } = useProjectStore();
+  const [projectName, setProjectName] = useState("Loading...");
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      if (!id) return;
+      await getProjectById(id);
+    };
+
+    fetchProject();
+  }, [id]);
+
+  useEffect(() => {
+    if (project && project.name) {
+      setProjectName(project.name);
+    }
+  }, [project]);
 
   return (
-    <aside className="w-64 h-screen overflow-y-auto border-r px-4 py-6 space-y-4 bg-white dark:bg-neutral-900">
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Projects</h2>
-      <Separator />
-      {projects.map((project) => {
-        const isOpen = openProjectId === project.id;
+    <div className="w-64 h-full border-r border-gray-200 dark:border-gray-800 bg-background p-4 flex flex-col">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-semibold">{projectName}</h2>
+        <div className="flex items-center gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Plus size={18} />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create a new Task?</DialogTitle>
+                <DialogDescription>
+                  Fill in the details to add a new task to this project.
+                </DialogDescription>
+              </DialogHeader>
+              <CreateNewTask members={members} />
+            </DialogContent>
+          </Dialog>
+          {onClose && (
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <X size={18} />
+            </Button>
+          )}
+        </div>
+      </div>
 
-        return (
-          <Collapsible
-            key={project._id}
-            open={isOpen}
-            onOpenChange={() => setOpenProjectId(isOpen ? null : project.id)}
-          >
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-between text-left font-medium"
-              >
-                {project.name}
-                {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="ml-4 mt-2 space-y-2">
-              <Button variant="ghost" className="w-full justify-start text-sm">
-                To Do
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-sm">
-                Completed
-              </Button>
-            </CollapsibleContent>
-          </Collapsible>
-        );
-      })}
-    </aside>
+      <Separator className="my-4" />
+
+      {/* Sections */}
+      <SidebarSection
+        title="To Do"
+        value="todo"
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+      <SidebarSection
+        title="In Progress"
+        value="in_progress"
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+      <SidebarSection
+        title="Completed"
+        value="completed"
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+      <SidebarSection
+        title="Members"
+        value="members"
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+      <SidebarSection
+        title="Notes"
+        value="notes"
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+    </div>
+  );
+}
+
+function SidebarSection({ title, value, activeTab, setActiveTab }) {
+  const isActive = activeTab === value;
+  return (
+    <Collapsible className="mt-2">
+      <CollapsibleTrigger asChild>
+        <Button
+          variant={isActive ? "secondary" : "ghost"}
+          className="w-full justify-start font-medium"
+          onClick={() => setActiveTab(value)}
+        >
+          {title}
+        </Button>
+      </CollapsibleTrigger>
+    </Collapsible>
   );
 }

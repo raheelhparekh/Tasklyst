@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import { ApiError } from "../utils/api-errors.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { ProjectMember } from "../models/projectmember.models.js";
+import { Task } from "../models/task.models.js";
 
 // get all projects of user
 const getAllProjectsOfUser = asyncHandler(async (req, res) => {
@@ -64,6 +65,16 @@ const createProject = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Please provide all required fields");
     }
 
+    // Check if project with the same name already exists
+    const existingProject = await Project.findOne({
+      name,
+      createdBy: req.user.id,
+    });
+    if (existingProject) {
+      throw new ApiError(400, "Project with this name already exists.");
+    }
+
+    // Create the project
     const projectCreated = await Project.create({
       name,
       description,
@@ -153,6 +164,15 @@ const addMemberToProject = asyncHandler(async (req, res) => {
     const project = await Project.findById(projectId);
     if (!project) {
       throw new ApiError(404, "Project with id not found");
+    }
+
+    // check if user is already a member of the project
+    const existingMember = await ProjectMember.findOne({
+      user: userId,
+      project: projectId,
+    });
+    if (existingMember) {
+      throw new ApiError(400, "User is already a member of this project.");
     }
 
     const newMember = await ProjectMember.create({
@@ -252,7 +272,7 @@ const updateMemberRole = asyncHandler(async (req, res) => {
   }
 });
 
-// delete member
+// delete member from project
 const deleteProjectMember = asyncHandler(async (req, res) => {
   try {
     const { id: memberId } = req.params;
@@ -267,6 +287,16 @@ const deleteProjectMember = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Project member with id not found");
     }
 
+    // console.log("member deleted:", member.project);
+    // console.log("member user:", member.user);
+    // console.log("member user id:", member.user._id);
+
+    // delete the tasks also associated with this member
+    await Task.deleteMany({
+      project: member.project,
+      assignedTo: member.user,
+    });
+
     return res
       .status(200)
       .json(new ApiResponse(200, null, "Project member deleted successfully."));
@@ -279,6 +309,7 @@ const deleteProjectMember = asyncHandler(async (req, res) => {
   }
 });
 
+// get all project members details - username, email, avatar
 const getAllProjectMembersDetails = asyncHandler(async (req, res) => {
   try {
     const { id: projectId } = req.params;
@@ -291,16 +322,12 @@ const getAllProjectMembersDetails = asyncHandler(async (req, res) => {
       "username email avatar",
     );
 
-    console.log(`Project members for ${projectId}:`, members);
+    // console.log(`Project members for ${projectId}:`, members);
 
     return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          members,
-          "Project members found successfully.",
-        ),
+        new ApiResponse(200, members, "Project members found successfully."),
       );
   } catch (error) {
     console.error("Error getting project members:", error);
@@ -321,5 +348,5 @@ export {
   addMemberToProject,
   createProject,
   updateProject,
-  getAllProjectMembersDetails
+  getAllProjectMembersDetails,
 };

@@ -4,7 +4,7 @@ import {
   createNote,
   deleteNote,
   getNoteById,
-  getNotes,
+  getProjectNotes,
   updateNote,
 } from "../controllers/note.controllers.js";
 import {
@@ -18,13 +18,13 @@ noteRoutes.get(
   "/:projectId",
   isLoggedIn,
   validateProjectPermission([UserRolesEnums.ADMIN, UserRolesEnums.MEMBER, UserRolesEnums.GUEST]),
-  getNotes,
+  getProjectNotes,
 );
 
 noteRoutes.post(
   "/:projectId/n/create-note",
   isLoggedIn,
-  validateProjectPermission([UserRolesEnums.ADMIN]),
+  validateProjectPermission([UserRolesEnums.ADMIN, UserRolesEnums.MEMBER]),
   createNote,
 );
 

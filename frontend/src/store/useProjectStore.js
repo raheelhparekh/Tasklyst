@@ -5,6 +5,7 @@ import { toast } from "sonner";
 export const useProjectStore = create((set) => ({
   projects: [],
   project: [],
+  members: [],
   isFetchingAllProjects: false,
   isFetchingProjectById: false,
   isCreatingProject: false,
@@ -81,7 +82,7 @@ export const useProjectStore = create((set) => ({
       const res = await axiosInstance.post("/project/create-project", data);
       const newProject = res.data.data;
 
-      // Fetch members count (like in getAllProjects)
+      // Fetch members count
       const countRes = await axiosInstance.get(
         `/project/get-all-members/${newProject._id}`,
       );
@@ -109,7 +110,10 @@ export const useProjectStore = create((set) => ({
   updateProject: async (id, data) => {
     try {
       set({ isUpdatingProject: true });
-      const res = await axiosInstance.put(`/project/update-project/${id}`,data);
+      const res = await axiosInstance.put(
+        `/project/update-project/${id}`,
+        data,
+      );
       console.log("updateProject response", res.data.data);
       set((state) => ({
         projects: state.projects.map((project) =>
@@ -131,18 +135,71 @@ export const useProjectStore = create((set) => ({
       set({ isDeletingProject: true });
       const res = await axiosInstance.delete(`/project/delete-project/${id}`);
       console.log("deleteProject response", res.data.data);
-      
+
       set((state) => ({
         projects: state.projects.filter((project) => project._id !== id),
       }));
       toast.success(res.data.message || "Project deleted successfully");
-    
     } catch (error) {
       console.error("Error deleting project:", error);
       toast.error("Failed to delete project");
-    
     } finally {
       set({ isDeletingProject: false });
+    }
+  },
+
+  getAllMembersDetails: async (id) => {
+    try {
+      const res = await axiosInstance.get(
+        `/project/get-all-members-details/${id}`,
+      );
+      console.log("getAllMembersDetails response", res.data.data);
+
+      // Assuming the response contains an array of member details
+      set({ members: res.data.data || [] });
+      toast.success(res.data.message || "Members details fetched successfully");
+    } catch (error) {
+      console.error("Error fetching members details:", error);
+      toast.error("Failed to fetch members details");
+      set({ members: [] });
+    }
+  },
+
+  changeMemberRole: async (memberId, role) => {
+    try {
+      const res = await axiosInstance.put(
+        `/project/update-member-role/${memberId}`,
+        { role },
+      );
+      console.log("changeMemberRole response", res.data.data);
+      toast.success(res.data.message || "Member role changed successfully");
+      // Update the member in the state
+      set((state) => ({
+        members: state.members.map((member) =>
+          member._id === memberId
+            ? { ...member, role: res.data.data.role }
+            : member,
+        ),
+      }));
+    } catch (error) {
+      console.error("Error changing member role:", error);
+      toast.error("Failed to change member role");
+    }
+  },
+  deleteProjectMember: async (memberId) => {
+    try {
+      const res = await axiosInstance.delete(
+        `/project/delete-member/${memberId}`,
+      );
+      console.log("deleteProjectMember response", res.data.data);
+      toast.success(res.data.message || "Project member deleted successfully");
+      // Remove the member from the state
+      set((state) => ({
+        members: state.members.filter((member) => member._id !== memberId),
+      }));
+    } catch (error) {
+      console.error("Error deleting project member:", error);
+      toast.error("Failed to delete project member");
     }
   },
 }));

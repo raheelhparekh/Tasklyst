@@ -9,6 +9,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import Layout from "./components/Layout";
+import TaskByIdPage from "./pages/TaskByIdPage";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -31,6 +32,7 @@ function App() {
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="/project/:id/task" element={<TaskPage />} />
+        <Route path="/task/:id" element={<TaskByIdPage />} />
         <Route path="/project" element={<ProjectPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>

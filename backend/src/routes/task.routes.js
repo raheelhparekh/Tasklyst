@@ -8,10 +8,11 @@ import {
   getAllTaskAssignedToUser,
 } from "../controllers/task.controllers.js";
 import {isLoggedIn} from "../middlewares/auth.middlewares.js"
+import upload from "../middlewares/multer.middlewares.js";
 
 const taskRoutes = Router();
 
-taskRoutes.post("/create-task/:projectId",isLoggedIn, createTask);
+taskRoutes.post("/create-task/:projectId",isLoggedIn, upload.single('attachments') ,createTask);
 
 taskRoutes.put("/update-task/:taskId", isLoggedIn, updateTask);
 

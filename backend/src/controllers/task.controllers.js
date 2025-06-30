@@ -17,28 +17,49 @@ import { User } from "../models/user.models.js";
 
 const createTask = asyncHandler(async (req, res) => {
   try {
-    const { title, description, email, status, priority, attachments } = req.body;
+    const {
+      title,
+      description,
+      email,
+      status,
+      dueDate,
+      priority,
+      attachments,
+    } = req.body;
     const { projectId } = req.params;
 
     const user = req.user;
     // console.log("user",user);
     console.log("this task is created by user name:", user.username);
 
-    if (!title || !email  || !priority) {
+    if (!title || !email) {
       throw new ApiError(400, "Title, Assigned To are required fields.");
     }
 
     const userAssignedTo = await User.findOne({ email });
+    if (!userAssignedTo) {
+      throw new ApiError(404, "User with this email not found.");
+    }
+    
     console.log("userAssignedTo", userAssignedTo);
     console.log("task is assigned to user name :", userAssignedTo.username);
+
+    // upload attachments if provided
+    if (attachments && attachments.length > 0) {
+      attachments.forEach((attachment) => {
+        if (!attachment.url || !attachment.mimeType || !attachment.size) {
+          throw new ApiError(400, "Invalid attachment format");
+        }
+      });
+    }
 
     const task = await Task.create({
       title,
       description,
       project: projectId,
       assignedTo: userAssignedTo,
-      status: status || "TODO", // Default status is TODO
-      priority: priority || "Medium", // Default priority is Medium
+      status: status || "todo", // Default status is TODO
+      priority: priority || "medium", // Default priority is Medium
       dueDate: null, // Default due date is null
       assignedBy: user,
       attachments: attachments || [],
@@ -50,7 +71,7 @@ const createTask = asyncHandler(async (req, res) => {
 
     return res
       .status(201)
-      .json(new ApiResponse(201, "Task created successfully", task));
+      .json(new ApiResponse(201, task, "Task created successfully" ));
   } catch (error) {
     console.error("Error creating task:", error);
     throw new ApiError(500, "Internal Server Error while creating task");
@@ -125,10 +146,9 @@ const deleteTask = asyncHandler(async (req, res) => {
     }
 
     await Task.findByIdAndDelete(taskId);
-    return res.status(200).json({
-      success: true,
-      message: "Task deleted successfully",
-    });
+    return res.status(200).json(
+      new ApiResponse(200, "Task deleted successfully"),
+    );
   } catch (error) {
     console.error("Error deleting task:", error);
     throw new ApiError(500, "Internal Server Error while deleting task");
@@ -138,7 +158,7 @@ const deleteTask = asyncHandler(async (req, res) => {
 const getAllTasksOfProject = asyncHandler(async (req, res) => {
   try {
     const { projectId } = req.params;
-    const {status} = req.query;
+    const { status } = req.query;
 
     const filter = { project: projectId };
     if (status) {
@@ -149,15 +169,15 @@ const getAllTasksOfProject = asyncHandler(async (req, res) => {
       .populate("assignedTo", "username email avatar")
       .populate("assignedBy", "username email avatar");
 
-    if (!tasks || tasks.length === 0) {
-      throw new ApiError(404, "No tasks found for this project");
-    }
+    // console.log("tasks of project", tasks);
 
-    return res.status(200).json({
-      success: true,
-      message: "All Tasks fetched successfully",
-      tasks,
-    });
+    // if (!tasks || tasks.length === 0) {
+    //   throw new ApiError(404, "No tasks found for this project");
+    // }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, tasks,  "Tasks fetched successfully"));
   } catch (error) {
     console.error("Error fetching tasks of project:", error);
     throw new ApiError(
@@ -215,7 +235,6 @@ const getAllTaskAssignedToUser = asyncHandler(async (req, res) => {
     );
   }
 });
-
 
 export {
   createTask,
