@@ -40,7 +40,7 @@ const createTask = asyncHandler(async (req, res) => {
     if (!userAssignedTo) {
       throw new ApiError(404, "User with this email not found.");
     }
-    
+
     console.log("userAssignedTo", userAssignedTo);
     console.log("task is assigned to user name :", userAssignedTo.username);
 
@@ -71,7 +71,7 @@ const createTask = asyncHandler(async (req, res) => {
 
     return res
       .status(201)
-      .json(new ApiResponse(201, task, "Task created successfully" ));
+      .json(new ApiResponse(201, task, "Task created successfully"));
   } catch (error) {
     console.error("Error creating task:", error);
     throw new ApiError(500, "Internal Server Error while creating task");
@@ -146,9 +146,9 @@ const deleteTask = asyncHandler(async (req, res) => {
     }
 
     await Task.findByIdAndDelete(taskId);
-    return res.status(200).json(
-      new ApiResponse(200, "Task deleted successfully"),
-    );
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Task deleted successfully"));
   } catch (error) {
     console.error("Error deleting task:", error);
     throw new ApiError(500, "Internal Server Error while deleting task");
@@ -177,7 +177,7 @@ const getAllTasksOfProject = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, tasks,  "Tasks fetched successfully"));
+      .json(new ApiResponse(200, tasks, "Tasks fetched successfully"));
   } catch (error) {
     console.error("Error fetching tasks of project:", error);
     throw new ApiError(
@@ -192,18 +192,16 @@ const getTaskById = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
 
     const task = await Task.findById(taskId)
-      .populate("assignedTo", "name email avatar")
-      .populate("assignedBy", "name email avatar");
+      .populate("assignedTo", "username email avatar")
+      .populate("assignedBy", "username email avatar");
 
     if (!task) {
       throw new ApiError(404, "Task not found");
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Task fetched successfully",
-      task,
-    });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, task, "Task fetched successfully"));
   } catch (error) {
     console.error("Error fetching task by ID:", error);
     throw new ApiError(500, "Internal Server Error while fetching task by ID");
@@ -222,11 +220,9 @@ const getAllTaskAssignedToUser = asyncHandler(async (req, res) => {
       throw new ApiError(404, "No tasks assigned to this user");
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "All tasks assigned to user fetched successfully",
-      tasks,
-    });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, tasks, "Tasks fetched successfully"));
   } catch (error) {
     console.error("Error fetching all tasks of user:", error);
     throw new ApiError(

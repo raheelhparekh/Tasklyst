@@ -33,7 +33,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="/project/:id/task" element={<TaskPage />} />
         <Route path="/task/:id" element={<TaskByIdPage />} />
-        <Route path="/project" element={<ProjectPage />} />
+        <Route path="/projects" element={<ProjectPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Route>
 

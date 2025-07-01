@@ -28,8 +28,7 @@ import { toast } from "sonner";
 export default function ProjectPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const { projects, getAllProjects, deleteProject, updateProject } =
-    useProjectStore();
+  const { projects, getAllProjects, deleteProject, updateProject } = useProjectStore();
 
   useEffect(() => {
     getAllProjects();

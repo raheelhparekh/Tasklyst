@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/api-response.js";
 import { Project } from "../models/project.models.js";
 import { Note } from "../models/note.models.js";
 import mongoose from "mongoose";
+import { Task } from "../models/task.models.js";
 
 const getProjectNotes = asyncHandler(async (req, res) => {
   try {
@@ -19,6 +20,7 @@ const getProjectNotes = asyncHandler(async (req, res) => {
 
     const notes = await Note.find({
       project: new mongoose.Types.ObjectId(projectId),
+      task: { $exists: false }, // Exclude notes associated with tasks
     }).populate("createdBy", "username email avatar");
 
     return res
@@ -57,32 +59,44 @@ const getNoteById = asyncHandler(async (req, res) => {
 
 const createNote = asyncHandler(async (req, res) => {
   try {
-    const { projectId } = req.params;
+    const { projectId, taskId } = req.params;
     const { content } = req.body;
 
-    if (!projectId || !content) {
-      throw new ApiError(400, "Project ID and content are required");
+    if (!content) {
+      throw new ApiError(400, "Note content is required");
     }
 
-    const project = await Project.findById(projectId);
-    if (!project) {
-      throw new ApiError(404, "Project not found");
+    let finalProjectId;
+
+    if (projectId) {
+      // Creating note for project directly
+      const project = await Project.findById(projectId);
+      if (!project) throw new ApiError(404, "Project not found");
+      finalProjectId = project._id;
+    } else if (taskId) {
+      // Creating note for a task → infer project from task
+      const task = await Task.findById(taskId);
+      if (!task) throw new ApiError(404, "Task not found");
+      finalProjectId = task.project; // task.project must be populated or valid ID
+    } else {
+      throw new ApiError(400, "Either projectId or taskId must be provided");
     }
 
     const note = await Note.create({
-      project: new mongoose.Types.ObjectId(projectId),
-      createdBy: new mongoose.Types.ObjectId(req.user.id),
+      project: finalProjectId,
+      task: taskId || undefined,
+      createdBy: req.user._id,
       content,
     });
 
     const createdNote = await Note.findById(note._id).populate(
       "createdBy",
-      "username email avatar",
+      "username email avatar"
     );
 
-    return res
-      .status(200)
-      .json(new ApiResponse(200, createdNote, "Note created successfully" ));
+    return res.status(200).json(
+      new ApiResponse(200, createdNote, "Note created successfully")
+    );
   } catch (error) {
     console.error("Error creating note:", error);
     throw new ApiError(500, "Internal server error while creating note.");
@@ -143,10 +157,24 @@ const deleteNote = asyncHandler(async (req, res) => {
   }
 });
 
+const getTaskNotes= asyncHandler(async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const notes = await Note.find({ task: new mongoose.Types.ObjectId(taskId) }).populate("createdBy", "username email avatar");
+    return res
+      .status(200)
+      .json(new ApiResponse(200, notes, "Notes of task retrieved successfully"));
+  } catch (error) {
+    console.error("Error getting notes:", error);
+    throw new ApiError(500, "Internal server error while getting notes.");
+  }
+});
+
 export {
   getProjectNotes,
   getNoteById,
   createNote,
   updateNote,
   deleteNote,
+  getTaskNotes
 };

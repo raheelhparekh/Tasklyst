@@ -5,6 +5,7 @@ import {
   deleteNote,
   getNoteById,
   getProjectNotes,
+  getTaskNotes,
   updateNote,
 } from "../controllers/note.controllers.js";
 import {
@@ -13,6 +14,12 @@ import {
 } from "../middlewares/auth.middlewares.js";
 
 const noteRoutes = Router();
+
+noteRoutes.get(
+  "/n/:taskId",
+  isLoggedIn,
+  getTaskNotes
+);
 
 noteRoutes.get(
   "/:projectId",
@@ -24,7 +31,13 @@ noteRoutes.get(
 noteRoutes.post(
   "/:projectId/n/create-note",
   isLoggedIn,
-  validateProjectPermission([UserRolesEnums.ADMIN, UserRolesEnums.MEMBER]),
+  // validateProjectPermission([UserRolesEnums.ADMIN, UserRolesEnums.MEMBER]),
+  createNote,
+);
+
+noteRoutes.post(
+  "/task/:taskId/create-note",
+  isLoggedIn,
   createNote,
 );
 
@@ -48,5 +61,7 @@ noteRoutes.delete(
   validateProjectPermission([UserRolesEnums.ADMIN]),
   deleteNote,
 );
+
+
 
 export default noteRoutes;

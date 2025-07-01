@@ -7,13 +7,24 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useProjectStore } from "@/store/useProjectStore";
 import { Button } from "@/components/ui/button";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useTaskStore } from "@/store/useTaskStore";
 import { useNoteStore } from "@/store/useNoteStore";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 function TaskPage() {
   const {
@@ -23,7 +34,7 @@ function TaskPage() {
     changeMemberRole,
     deleteProjectMember,
   } = useProjectStore();
-  const [activeTab, setActiveTab] = useState("todo"); // default could be "todo"
+  const [activeTab, setActiveTab] = useState("todo"); // default active tab
   const { id } = useParams();
   const {
     getAllTodoTasks,
@@ -33,8 +44,9 @@ function TaskPage() {
     completedTasks,
     in_progress,
   } = useTaskStore();
-  const { getAllProjectNotes, notes } = useNoteStore();
+  const { getAllProjectNotes, notes, createProjectNote } = useNoteStore();
   const navigate = useNavigate();
+  const [content, setContent] = useState("");
 
   useEffect(() => {
     getAllTodoTasks(id);
@@ -165,6 +177,39 @@ function TaskPage() {
       },
     },
     {
+      accessorKey: "dueDate",
+      header: "Due Date",
+      cell: ({ row }) => {
+        const dueDate = new Date(row.original.dueDate);
+        return (
+          <span>
+            {dueDate.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "priority",
+      header: "Priority",
+      cell: ({ row }) => {
+        const priority = row.original.priority;
+        const priorityColors = {
+          high: "text-red-500",
+          medium: "text-yellow-500",
+          low: "text-green-500",
+        };
+        return (
+          <span className={`px-2 py-1 rounded-md ${priorityColors[priority]}`}>
+            {priority}
+          </span>
+        );
+      },
+    },
+    {
       accessorKey: "status",
       header: "Status",
 
@@ -234,6 +279,16 @@ function TaskPage() {
     },
   ];
 
+  const handleSubmit = async () => {
+    try {
+      console.log("content", content);
+      await createProjectNote(content, id);
+      setContent(""); // Clear the content after submission
+    } catch (error) {
+      console.error("Error creating note:", error);
+    }
+  };
+
   return (
     <div className="flex">
       <ProjectSidebar
@@ -293,16 +348,49 @@ function TaskPage() {
           </div>
         )}
         {activeTab === "notes" && (
-          <div className="w-full">
-            <h2 className="mb-6 text-2xl font-bold text-slate-700 dark:text-slate-300">
-              Notes.
-            </h2>
+          <>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-slate-700 dark:text-slate-300">
+                Notes.
+              </h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Plus size={18} />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create a new Note</DialogTitle>
+                    <DialogDescription>
+                      Fill in the details to add a new note to this task.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <Label htmlFor="content" className="text-sm">
+                      Content
+                    </Label>
+                    <Textarea
+                      id="content"
+                      placeholder="Type your note here..."
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                    />
+                  </div>
+
+                  <DialogFooter>
+                    <Button onClick={handleSubmit}>Add Note</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             <DataTable
               columns={noteColumn}
               data={notes}
               onRowClick={(row) => console.log("Go to notes page for", row.id)}
             />
-          </div>
+          </>
         )}
       </main>
     </div>

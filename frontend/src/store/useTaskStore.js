@@ -4,6 +4,7 @@ import { create } from "zustand";
 
 export const useTaskStore = create((set) => ({
   tasks: [],
+  task: [],
   todoTasks: [],
   in_progress: [],
   completedTasks: [],
@@ -11,6 +12,7 @@ export const useTaskStore = create((set) => ({
   isCreatingTask: false,
   isUpdatingTask: false,
   isDeletingTask: false,
+  isFetchingTaskById: false,
 
   createTask: async (data, projectId) => {
     try {
@@ -83,4 +85,23 @@ export const useTaskStore = create((set) => ({
       set({ isFetchingTasks: false });
     }
   },
+
+  getTaskById:async(id) => {
+    try {
+      set({ isFetchingTaskById: true });
+      const res = await axiosInstance.get(`/task/${id}`);
+      console.log("getTaskById response", res.data.data);
+      set({ task: res.data.data || [] });
+      toast.success(res.data.message || "Task fetched successfully");
+      
+    } catch (error) {
+      console.error("Error fetching task by id:", error);
+      toast.error(error.response?.data?.message || "Failed to fetch task");
+      set({ task: [] });
+      
+    }
+    finally {
+      set({ isFetchingTaskById: false });
+    }
+  }
 }));
