@@ -28,7 +28,7 @@ import { toast } from "sonner";
 export default function ProjectPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const { projects, getAllProjects, deleteProject, updateProject } = useProjectStore();
+  const { projects, getAllProjects, deleteProject, updateProject} = useProjectStore();
 
   useEffect(() => {
     getAllProjects();
@@ -108,6 +108,7 @@ export default function ProjectPage() {
 
         return (
           <>
+          {/*TODO: remove this dropdown menu as it is not needed*/}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-8 w-8 p-0">
@@ -118,9 +119,9 @@ export default function ProjectPage() {
                 <DropdownMenuItem onClick={() => {}}>
                   Update Member Role
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => alert("Add member")}>
+                {/* <DropdownMenuItem onClick={handleAddMember}>
                   Add Member
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={() => alert("Delete member")}>
                   Delete Member
                 </DropdownMenuItem>
@@ -159,7 +160,7 @@ export default function ProjectPage() {
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full ">
       <h2 className="mb-6 text-2xl font-bold text-slate-700 dark:text-slate-300">
         Projects
       </h2>
@@ -167,7 +168,7 @@ export default function ProjectPage() {
       <DataTable
         columns={columns}
         data={filteredData}
-        onRowClick={(row) => console.log("Go to tasks page for", row.id)}
+        onRowClick={(row) => console.log("Go to tasks page for project id", row._id)}
       />
     </div>
   );

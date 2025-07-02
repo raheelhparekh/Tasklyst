@@ -103,5 +103,25 @@ export const useTaskStore = create((set) => ({
     finally {
       set({ isFetchingTaskById: false });
     }
-  }
+  },
+
+  deleteTask: async (id) => {
+    try {
+      set({ isDeletingTask: true });
+      const res = await axiosInstance.delete(`/task/delete-task/${id}`);
+      console.log("deleteTask response", res.data);
+      toast.success(res.data.message || "Task deleted successfully");
+      set((state) => ({
+        tasks: state.tasks.filter((task) => task._id !== id),
+        todoTasks: state.todoTasks.filter((task) => task._id !== id),
+        in_progress: state.in_progress.filter((task) => task._id !== id),
+        completedTasks: state.completedTasks.filter((task) => task._id !== id),
+      }));
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      toast.error(error.response?.data?.message || "Failed to delete task");
+    } finally {
+      set({ isDeletingTask: false });
+    }
+  },
 }));

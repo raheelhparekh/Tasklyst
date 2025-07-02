@@ -14,6 +14,7 @@ import { ApiError } from "../utils/api-errors.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { Task } from "../models/task.models.js";
 import { User } from "../models/user.models.js";
+import { Note } from "../models/note.models.js";
 
 const createTask = asyncHandler(async (req, res) => {
   try {
@@ -146,6 +147,12 @@ const deleteTask = asyncHandler(async (req, res) => {
     }
 
     await Task.findByIdAndDelete(taskId);
+
+    // delete notes associated with this task if any
+    await Note.deleteMany({ task: taskId });
+
+    //TODO: delete attachments from cloud storage if any. write the delete logic in middlewares
+    
     return res
       .status(200)
       .json(new ApiResponse(200, "Task deleted successfully"));

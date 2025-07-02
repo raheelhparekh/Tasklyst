@@ -8,6 +8,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -25,14 +33,17 @@ import { useTaskStore } from "@/store/useTaskStore";
 import { useNoteStore } from "@/store/useNoteStore";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 function TaskPage() {
   const {
     getAllProjects,
+    project,
     members,
     getAllMembersDetails,
     changeMemberRole,
     deleteProjectMember,
+    addMemberToProject,
   } = useProjectStore();
   const [activeTab, setActiveTab] = useState("todo"); // default active tab
   const { id } = useParams();
@@ -43,10 +54,12 @@ function TaskPage() {
     todoTasks,
     completedTasks,
     in_progress,
+    deleteTask,
   } = useTaskStore();
   const { getAllProjectNotes, notes, createProjectNote } = useNoteStore();
   const navigate = useNavigate();
   const [content, setContent] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     getAllTodoTasks(id);
@@ -159,6 +172,11 @@ function TaskPage() {
     {
       accessorKey: "description",
       header: "Description",
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground truncate max-w-xs block">
+          {row.original.description}
+        </span>
+      ),
     },
     {
       accessorKey: "assignedTo.username",
@@ -245,7 +263,7 @@ function TaskPage() {
               >
                 Change Status
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => alert(`Remove ${task.title}`)}>
+              <DropdownMenuItem  onClick={handleDeleteTask.bind(null, task._id)}>
                 Remove Task
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -260,6 +278,11 @@ function TaskPage() {
     {
       accessorKey: "content",
       header: "Content",
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground truncate max-w-xs block">
+          {row.original.content}
+        </span>
+      ),
     },
     {
       accessorKey: "createdBy.username",
@@ -289,27 +312,96 @@ function TaskPage() {
     }
   };
 
+  const handleAddMember = async () => {
+    try {
+      console.log("Adding member with email:", email);
+      await addMemberToProject(id, { email, role: "member" });
+      setEmail("");
+      console.log("Member added successfully");
+    } catch (error) {
+      console.error("Error adding member:", error);
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      console.log("Deleting task with ID:", taskId);
+      await deleteTask(taskId);
+      // console.log("Task deleted successfully");
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
+  }
+
   return (
-    <div className="flex">
+    <div className="flex h-screen w-full">
       <ProjectSidebar
-        onClose={() => navigate("/project")}
+        onClose={() => navigate("/projects")}
         setActiveTab={setActiveTab}
         activeTab={activeTab}
         members={members}
       />
 
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 ">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{project?.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         {activeTab === "members" && (
-          <div className="w-full">
-            <h2 className="mb-6 text-2xl font-bold text-slate-700 dark:text-slate-300">
-              Members.
-            </h2>
+          <>
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="mb-6 text-2xl font-bold text-slate-700 dark:text-slate-300">
+                Members.
+              </h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Plus size={18} />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add A Member?</DialogTitle>
+                    <DialogDescription>
+                      Enter the email of the user you want to add.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <Label htmlFor="email" className="text-sm">
+                      Email
+                    </Label>
+                    <Input
+                      type="email"
+                      id="email"
+                      placeholder="Enter the email..."
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleAddMember}>Add Member</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             <DataTable
               columns={columns}
               data={members || []}
               onRowClick={(row) => console.log("Clicked member:", row.user._id)}
             />
-          </div>
+          </>
         )}
         {activeTab === "todo" && (
           <div className="w-full">
@@ -319,7 +411,7 @@ function TaskPage() {
             <DataTable
               columns={taskColumns}
               data={todoTasks}
-              onRowClick={(row) => console.log("Go to tasks page for", row.id)}
+              onRowClick={(row) => console.log("Go to tasks page for", row._id)}
             />
           </div>
         )}

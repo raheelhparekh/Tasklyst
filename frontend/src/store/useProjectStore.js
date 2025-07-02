@@ -107,6 +107,7 @@ export const useProjectStore = create((set) => ({
     }
   },
 
+  //TODO: pending
   updateProject: async (id, data) => {
     try {
       set({ isUpdatingProject: true });
@@ -202,4 +203,30 @@ export const useProjectStore = create((set) => ({
       toast.error("Failed to delete project member");
     }
   },
+
+  addMemberToProject: async (projectId, memberData) => {
+    try {
+      const res = await axiosInstance.post(
+        `/project/add-member/${projectId}`,
+        memberData,
+      );
+      console.log("addMemberToProject response", res.data.data);
+      
+      // Update the project members count
+      set((state) => ({
+        projects: state.projects.map((project) =>
+          project._id === projectId
+            ? { ...project, members: project.members + 1 }
+            : project,
+        ),
+      }));
+      
+      toast.success(res.data.message || "Member added to project successfully");
+      
+    } catch (error) {
+      console.error("Error adding member to project:", error);
+      toast.error("Failed to add member to project");
+      
+    }
+  }
 }));

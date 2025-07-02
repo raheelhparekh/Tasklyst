@@ -4,6 +4,7 @@ import { ApiError } from "../utils/api-errors.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { ProjectMember } from "../models/projectmember.models.js";
 import { Task } from "../models/task.models.js";
+import { User } from "../models/user.models.js";
 
 // get all projects of user
 const getAllProjectsOfUser = asyncHandler(async (req, res) => {
@@ -14,9 +15,9 @@ const getAllProjectsOfUser = asyncHandler(async (req, res) => {
 
     // console.log("projects from backend:", projects);
 
-    if (!projects || projects.length === 0) {
-      throw new ApiError(404, "No projects found for this user");
-    }
+    // if (!projects || projects.length === 0) {
+    //   throw new ApiError(404, "No projects found for this user");
+    // }
 
     return res
       .status(200)
@@ -85,6 +86,13 @@ const createProject = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Project creation failed.");
     }
 
+    // Automatically add the creator as a member of the project
+    await ProjectMember.create({
+      project: projectCreated._id,
+      user: req.user.id,
+      role: "ADMIN",
+    });
+
     const project = await Project.findById(projectCreated._id)
       .select("name description createdBy createdAt")
       .populate("createdBy", "username email avatar");
@@ -142,6 +150,11 @@ const deleteProject = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Project with id not found");
     }
 
+    // delete all project members associated with this project and their tasks and thier notes
+    await ProjectMember.deleteMany({ project: id });
+    await Task.deleteMany({ project: id });
+    await Note.deleteMany({ project: id });
+
     return res
       .status(200)
       .json(new ApiResponse(200, null, "Project deleted successfully."));
@@ -151,14 +164,14 @@ const deleteProject = asyncHandler(async (req, res) => {
   }
 });
 
-// add member to project
+// add member to project, add member by entering email and role
 const addMemberToProject = asyncHandler(async (req, res) => {
   try {
-    const { userId, role } = req.body;
+    const { email, role } = req.body;
     const { id: projectId } = req.params;
 
-    if (!userId || !projectId) {
-      throw new ApiError(400, "Please provide userId and projectId");
+    if (!email || !projectId) {
+      throw new ApiError(400, "Please provide email and projectId");
     }
 
     const project = await Project.findById(projectId);
@@ -166,9 +179,14 @@ const addMemberToProject = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Project with id not found");
     }
 
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new ApiError(404, "User with email not found");
+    }
+
     // check if user is already a member of the project
     const existingMember = await ProjectMember.findOne({
-      user: userId,
+      user: user._id,
       project: projectId,
     });
     if (existingMember) {
@@ -176,7 +194,7 @@ const addMemberToProject = asyncHandler(async (req, res) => {
     }
 
     const newMember = await ProjectMember.create({
-      user: userId,
+      user: user._id,
       project: projectId,
       role: role || "MEMBER",
     });
