@@ -49,7 +49,7 @@ export const useProjectStore = create((set) => ({
       // Step 3: Set updated projects in state
       set({ projects: projectsWithMemberCounts });
 
-      toast.success(res.data.message || "All Projects fetched successfully");
+      // toast.success(res.data.message || "All Projects fetched successfully");
     } catch (error) {
       console.error("Error fetching projects:", error);
       toast.error("Failed to fetch all projects");
@@ -65,7 +65,7 @@ export const useProjectStore = create((set) => ({
       const res = await axiosInstance.get(`/project/${id}`);
       console.log("getProjectById response", res.data.data);
       set({ project: res.data.data });
-      toast.success(res.data.message || "Project fetched successfully");
+      // toast.success(res.data.message || "Project fetched successfully");
     } catch (error) {
       console.error("Error fetching project by id:", error);
       toast.error("Failed to fetch project by id");
@@ -158,7 +158,7 @@ export const useProjectStore = create((set) => ({
 
       // Assuming the response contains an array of member details
       set({ members: res.data.data || [] });
-      toast.success(res.data.message || "Members details fetched successfully");
+      // toast.success(res.data.message || "Members details fetched successfully");
     } catch (error) {
       console.error("Error fetching members details:", error);
       toast.error("Failed to fetch members details");

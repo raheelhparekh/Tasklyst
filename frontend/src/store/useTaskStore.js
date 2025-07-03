@@ -40,7 +40,7 @@ export const useTaskStore = create((set) => ({
       );
       console.log("getAllTodoTasks response", res.data.data);
       set({ todoTasks: res.data.data || [] });
-      toast.success(res.data.message || "Tasks fetched successfully");
+      // toast.success(res.data.message || "Tasks fetched successfully");
     } catch (error) {
       console.error("Error fetching tasks:", error);
       toast.error(error.response?.data?.message || "Failed to fetch tasks");
@@ -58,7 +58,7 @@ export const useTaskStore = create((set) => ({
       );
       console.log("getAllInProgressTasks response", res.data.data);
       set({ in_progress: res.data.data || [] });
-      toast.success(res.data.message || "Tasks fetched successfully");
+      // toast.success(res.data.message || "Tasks fetched successfully");
     } catch (error) {
       console.error("Error fetching tasks:", error);
       toast.error(error.response?.data?.message || "Failed to fetch tasks");
@@ -76,7 +76,7 @@ export const useTaskStore = create((set) => ({
       );
       console.log("getAllCompletedTasks response", res.data.data);
       set({ completedTasks: res.data.data || [] });
-      toast.success(res.data.message || "Tasks fetched successfully");
+      // toast.success(res.data.message || "Tasks fetched successfully");
     } catch (error) {
       console.error("Error fetching tasks:", error);
       toast.error(error.response?.data?.message || "Failed to fetch tasks");
@@ -92,7 +92,7 @@ export const useTaskStore = create((set) => ({
       const res = await axiosInstance.get(`/task/${id}`);
       console.log("getTaskById response", res.data.data);
       set({ task: res.data.data || [] });
-      toast.success(res.data.message || "Task fetched successfully");
+      // toast.success(res.data.message || "Task fetched successfully");
       
     } catch (error) {
       console.error("Error fetching task by id:", error);

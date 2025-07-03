@@ -16,7 +16,7 @@ export const useNoteStore = create((set) => ({
       const res = await axiosInstance.get(`/note/${projectId}`);
       console.log("getAllProjectNotes response", res.data.data);
       set({ notes: res.data.data || [] });
-      toast.success(res.data.message || "Notes fetched successfully");
+      // toast.success(res.data.message || "Notes fetched successfully");
     } catch (error) {
       console.error("Error fetching notes:", error);
       toast.error(error.response?.data?.message || "Failed to fetch notes");
@@ -32,7 +32,7 @@ export const useNoteStore = create((set) => ({
       const res = await axiosInstance.get(`/note/n/${taskId}`);
       console.log("getAllTaskNotes response", res.data.data);
       set({ taskNotes: res.data.data || [] });
-      toast.success(res.data.message || "Notes fetched successfully");
+      // toast.success(res.data.message || "Notes fetched successfully");
     } catch (error) {
       console.error("Error fetching task notes:", error);
       toast.error(error.response?.data?.message || "Failed to fetch notes");

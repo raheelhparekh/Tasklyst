@@ -1,5 +1,5 @@
 import { useAuthStore } from "@/store/useAuthStore";
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Dialog,
@@ -23,7 +23,7 @@ import {
 
 function Navbar() {
   const { logout, authUser } = useAuthStore();
-  const [openLogoutDialog, setOpenLogoutDialog] = React.useState(false);
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -41,7 +41,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="flex w-full items-center justify-between border-t border-b border-neutral-200 px-4 py-4 dark:border-neutral-800">
+    <nav className="relative z-50 flex w-full items-center justify-between border-t border-b border-neutral-200 px-4 py-4 dark:border-neutral-800">
       <div className="flex items-center gap-2" onClick={() => navigate("/")}>
         <div className="size-7 rounded-full bg-gradient-to-br from-violet-500 to-pink-500" />
         <h1 className="text-base font-bold md:text-2xl">Tasklyst</h1>
@@ -63,7 +63,7 @@ function Navbar() {
                 Profile
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/projects")}>
-                Projects
+                Dashboard
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

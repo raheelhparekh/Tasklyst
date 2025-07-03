@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar.jsx";
+import Footer from "./Footer.jsx";
 
 
 export default function Layout() {
@@ -32,6 +33,7 @@ export default function Layout() {
         className="px-4 py-10 md:py-20 w-full"
       >
         <Outlet />
+        <Footer/>
       </motion.div>
     </div>
   );

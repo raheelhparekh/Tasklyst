@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import ProjectPageControls from "@/components/ProjectPageControls";
 import { useProjectStore } from "@/store/useProjectStore";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProjectPage() {
   const navigate = useNavigate();
@@ -43,12 +44,13 @@ export default function ProjectPage() {
       accessorKey: "name",
       header: "Project",
       cell: ({ row }) => (
-        <button
-          className="text-blue-600 hover:underline"
+        <Badge
+          variant={"outline"}
+          className="text-purple-600 hover:underline"
           onClick={() => navigate(`/project/${row.original._id}/task`)}
         >
           {row.original.name}
-        </button>
+        </Badge>
       ),
     },
     {
@@ -160,7 +162,7 @@ export default function ProjectPage() {
   ];
 
   return (
-    <div className="w-full ">
+    <div className="w-full h-screen ">
       <h2 className="mb-6 text-2xl font-bold text-slate-700 dark:text-slate-300">
         Projects
       </h2>

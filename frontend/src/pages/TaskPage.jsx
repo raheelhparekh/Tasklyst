@@ -263,7 +263,7 @@ function TaskPage() {
               >
                 Change Status
               </DropdownMenuItem>
-              <DropdownMenuItem  onClick={handleDeleteTask.bind(null, task._id)}>
+              <DropdownMenuItem onClick={() => handleDeleteTask(task._id)}>
                 Remove Task
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -331,7 +331,7 @@ function TaskPage() {
     } catch (error) {
       console.error("Error deleting task:", error);
     }
-  }
+  };
 
   return (
     <div className="flex h-screen w-full">

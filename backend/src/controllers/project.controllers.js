@@ -9,20 +9,57 @@ import { User } from "../models/user.models.js";
 // get all projects of user
 const getAllProjectsOfUser = asyncHandler(async (req, res) => {
   try {
-    const projects = await Project.find({ createdBy: req.user.id })
-      .select("name description createdBy createdAt") // only return these fields
-      .populate("createdBy", "username email avatar"); // populate only these fields from User;
+    // Projects created by user
+    const createdProjects = await Project.find({ createdBy: req.user.id })
+      .select("name description createdBy createdAt")
+      .populate("createdBy", "username email avatar");
 
-    // console.log("projects from backend:", projects);
+    // Add role = "ADMIN" to created projects manually
+    const projectsWithRoles = createdProjects.map((proj) => ({
+      ...proj.toObject(),
+      role: "admin",
+    }));
 
-    // if (!projects || projects.length === 0) {
-    //   throw new ApiError(404, "No projects found for this user");
-    // }
+    // console.log("projectsWithRoles", projectsWithRoles);
+
+    // Assigned projects
+    const assignedProjects = await ProjectMember.find({
+      user: req.user.id,
+    })
+      .populate({
+        path: "project",
+        select: "name description createdBy createdAt",
+        populate: {
+          path: "createdBy",
+          select: "username email avatar",
+        },
+      })
+      .select("project user role");
+
+    // Add role from ProjectMember to project
+    const assignedWithRoles = assignedProjects.map((item) => ({
+      ...item.project.toObject(),
+      role: item.role,
+    }));
+
+    // console.log("assignedWithRoles", assignedWithRoles);
+
+    // Merge and deduplicate by project ID
+    const allProjects = [...projectsWithRoles, ...assignedWithRoles];
+    const uniqueProjects = Array.from(
+      new Map(allProjects.map((proj) => [proj._id.toString(), proj])).values(),
+    );
+
+    // console.log("uniqueProjects", uniqueProjects);
 
     return res
       .status(200)
       .json(
-        new ApiResponse(200, projects, "All User Projects found successfully."),
+        new ApiResponse(
+          200,
+          uniqueProjects,
+          "All User Projects found successfully.",
+        ),
       );
   } catch (error) {
     console.error("Error getting projects:", error);
@@ -90,7 +127,7 @@ const createProject = asyncHandler(async (req, res) => {
     await ProjectMember.create({
       project: projectCreated._id,
       user: req.user.id,
-      role: "ADMIN",
+      role: "admin",
     });
 
     const project = await Project.findById(projectCreated._id)

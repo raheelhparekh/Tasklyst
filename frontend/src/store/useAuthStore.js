@@ -15,7 +15,7 @@ export const useAuthStore = create((set) => ({
       console.log("checkAuth response", res.data);
 
       set({ authUser: res.data.data });
-      toast.success("User authenticated successfully");
+      // toast.success("User authenticated successfully");
     } catch (error) {
       console.error("Error checking auth", error);
       toast.error("Error checking auth. Please try again.");
