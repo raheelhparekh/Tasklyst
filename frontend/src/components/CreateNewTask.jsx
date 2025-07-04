@@ -39,7 +39,7 @@ export default function CreateNewTask({ onClose, members }) {
       data.dueDate ? data.dueDate.toISOString() : null,
     );
 
-    if (data.attachments && data.attachments.length > 0) {
+    if (data.attachments?.length > 0) {
       Array.from(data.attachments).forEach((file) => {
         formData.append("attachments", file);
       });
@@ -49,7 +49,7 @@ export default function CreateNewTask({ onClose, members }) {
 
     try {
       await createTask(formData, id);
-      console.log("Task created successfully");
+      // console.log("Task created successfully");
       reset();
       onClose?.();
     } catch (error) {

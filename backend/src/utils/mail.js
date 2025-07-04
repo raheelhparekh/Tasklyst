@@ -7,7 +7,7 @@ export const sendMail = async (options) => {
     product: {
       // Appears in header & footer of e-mails
       name: "Task Manager",
-      link: process.env.BASE_URL || "http://localhost:8000",
+      link: process.env.BASE_URL || "http://localhost:5173",
     },
   });
 

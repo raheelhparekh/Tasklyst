@@ -7,6 +7,8 @@ export const useAuthStore = create((set) => ({
   isSigninUp: false,
   isLoggingIn: false,
   isCheckingAuth: false,
+  isSubmitting: false,
+  isUpdating: false,
 
   checkAuth: async () => {
     try {
@@ -69,6 +71,64 @@ export const useAuthStore = create((set) => ({
     } catch (error) {
       console.error("Logout error", error);
       toast.error("Error logging out. Please try again.");
+    }
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      set({ isSubmitting: true });
+      const res = await axiosInstance.post("/auth/forgot-password", email);
+      console.log("forgotPassword response", res.data);
+      toast.success(res.data.message || "Reset link sent to your email");
+    } catch (error) {
+      console.error("Forgot password error", error);
+      toast.error("Error sending reset link. Please try again.");
+    } finally {
+      set({ isSubmitting: false });
+    }
+  },
+
+  resetPassword: async (data, token) => {
+    try {
+      set({ isSubmitting: true });
+      console.log("Resetting password with data:", data);
+      const res = await axiosInstance.post(
+        `/auth/reset-password/${token}`,
+        data,
+      );
+      console.log("resetPassword response", res.data);
+      toast.success(res.data.message || "Password reset successful");
+    } catch (error) {
+      console.error("Reset password error", error);
+      toast.error("Error resetting password. Please try again.");
+    } finally {
+      set({ isSubmitting: false });
+    }
+  },
+
+  getUserProfile: async () => {
+    try {
+      const res = await axiosInstance.get(`/auth/profile`);
+      console.log("getUserProfile response", res.data);
+      return res.data.data;
+    } catch (error) {
+      console.error("Error fetching user profile", error);
+      toast.error("Error fetching user profile. Please try again.");
+      return null;
+    }
+  },
+  updateUserProfile: async (data) => {
+    try {
+      set({ isUpdating: true });
+      const res = await axiosInstance.put(`/auth/update-profile`, data);
+      console.log("updateUserProfile response", res.data);
+      set({ authUser: res.data.data });
+      toast.success(res.data.message || "Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating user profile", error);
+      toast.error("Error updating profile. Please try again.");
+    } finally {
+      set({ isUpdating: false });
     }
   },
 }));

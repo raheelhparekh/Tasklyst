@@ -10,6 +10,8 @@ import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import Layout from "./components/Layout";
 import TaskByIdPage from "./pages/TaskByIdPage";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -45,6 +47,16 @@ function App() {
       <Route
         path="/signup"
         element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
+      />
+
+      <Route
+        path="/forgot-password"
+        element={<ForgotPassword />}
+      />
+
+      <Route
+        path="/reset-password/:token"
+        element={<ResetPassword />}
       />
     </Routes>
   );

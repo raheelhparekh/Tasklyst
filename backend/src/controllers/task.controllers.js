@@ -25,7 +25,6 @@ const createTask = asyncHandler(async (req, res) => {
       status,
       dueDate,
       priority,
-      attachments,
     } = req.body;
     const { projectId } = req.params;
 
@@ -41,18 +40,17 @@ const createTask = asyncHandler(async (req, res) => {
     if (!userAssignedTo) {
       throw new ApiError(404, "User with this email not found.");
     }
+    // console.log("userAssignedTo", userAssignedTo);
+    // console.log("task is assigned to user name :", userAssignedTo.username);
 
-    console.log("userAssignedTo", userAssignedTo);
-    console.log("task is assigned to user name :", userAssignedTo.username);
+    // Process uploaded attachments
+    const attachments = req.files?.map((file) => ({
+      url: file.path,
+      mimeType: file.mimetype,
+      size: file.size,
+      filename: file.originalname,
+    })) || [];
 
-    // upload attachments if provided
-    if (attachments && attachments.length > 0) {
-      attachments.forEach((attachment) => {
-        if (!attachment.url || !attachment.mimeType || !attachment.size) {
-          throw new ApiError(400, "Invalid attachment format");
-        }
-      });
-    }
 
     const task = await Task.create({
       title,
@@ -61,7 +59,7 @@ const createTask = asyncHandler(async (req, res) => {
       assignedTo: userAssignedTo,
       status: status || "todo", // Default status is TODO
       priority: priority || "medium", // Default priority is Medium
-      dueDate: null, // Default due date is null
+      dueDate: dueDate || null, // Optional due date
       assignedBy: user,
       attachments: attachments || [],
     });
@@ -152,7 +150,7 @@ const deleteTask = asyncHandler(async (req, res) => {
     await Note.deleteMany({ task: taskId });
 
     //TODO: delete attachments from cloud storage if any. write the delete logic in middlewares
-    
+
     return res
       .status(200)
       .json(new ApiResponse(200, "Task deleted successfully"));

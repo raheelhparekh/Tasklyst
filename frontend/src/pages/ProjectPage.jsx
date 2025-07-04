@@ -170,7 +170,7 @@ export default function ProjectPage() {
       <DataTable
         columns={columns}
         data={filteredData}
-        onRowClick={(row) => console.log("Go to tasks page for project id", row._id)}
+        onRowClick={(row) => navigate(`/project/${row._id}/task`)}
       />
     </div>
   );

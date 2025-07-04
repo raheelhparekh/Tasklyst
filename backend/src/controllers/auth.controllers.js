@@ -294,7 +294,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
       subject: "Reset your password", // ✅ required
       mailGenContent: forgotPasswordMailGenContent(
         user.username,
-        `${process.env.BASE_URL}/api/v1/auth/reset-password/${unHashedToken}`,
+        `${process.env.BASE_URL}/reset-password/${unHashedToken}`,
       ),
     });
     
@@ -394,7 +394,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-const check = async (req, res) => {
+const check =  asyncHandler(async (req, res) => {
   try {
     return res
       .status(200)
@@ -403,7 +403,7 @@ const check = async (req, res) => {
     console.error("Error in checking auth:", error);
     throw new ApiError(500, "Internal server error in check auth.", error);
   }
-};
+});
 
 export {
   registerUser,

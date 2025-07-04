@@ -78,11 +78,32 @@ const forgotPasswordRequestValidator = () => {
 
 const resetPasswordValidator = () => {
   return [
-    body("newPassword").trim().notEmpty().withMessage("Password is Required"),
-    body("newConfirmPassword")
-      .trim()
+    body("newPassword")
       .notEmpty()
-      .withMessage("Password is Required"),
+      .withMessage("Password is required")
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters long")
+      .matches(/[a-z]/)
+      .withMessage("Password must contain at least one lowercase letter")
+      .matches(/[A-Z]/)
+      .withMessage("Password must contain at least one uppercase letter")
+      .matches(/[0-9]/)
+      .withMessage("Password must contain at least one number")
+      .matches(/[\W_]/)
+      .withMessage("Password must contain at least one special character"),
+    body("newConfirmPassword")
+      .notEmpty()
+      .withMessage("Password is required")
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters long")
+      .matches(/[a-z]/)
+      .withMessage("Password must contain at least one lowercase letter")
+      .matches(/[A-Z]/)
+      .withMessage("Password must contain at least one uppercase letter")
+      .matches(/[0-9]/)
+      .withMessage("Password must contain at least one number")
+      .matches(/[\W_]/)
+      .withMessage("Password must contain at least one special character"),
   ];
 };
 

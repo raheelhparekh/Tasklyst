@@ -59,9 +59,9 @@ function Navbar() {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
+              {/* <DropdownMenuItem onClick={() => navigate("/profile")}>
                 Profile
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem onClick={() => navigate("/projects")}>
                 Dashboard
               </DropdownMenuItem>

@@ -68,6 +68,7 @@ export default function LoginPage() {
                 id="email"
                 type="email"
                 placeholder="you@example.com"
+                className="mt-1"
                 {...register("email")}
               />
               {errors.email && (
@@ -84,6 +85,7 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••"
+                  className="mt-1 pr-10"
                   {...register("password")}
                 />
                 <button
@@ -96,7 +98,7 @@ export default function LoginPage() {
                   ) : (
                     <Eye className="w-5 h-5" />
                   )}
-                </button>
+                </button>                
               </div>
               {errors.password && (
                 <p className="text-sm text-red-500 mt-1">
@@ -115,6 +117,26 @@ export default function LoginPage() {
                 "Login"
               )}
             </Button>
+            <div className="flex justify-between mt-4">
+              <p className="text-sm text-left text-gray-500">
+                Don't have an account?{" "}
+                <a
+                  href="/signup"
+                  className="text-primary hover:underline"
+                >
+                  Register here
+                </a>
+              </p>
+
+              <p className="text-sm text-right text-gray-500">
+                <a
+                  href="/forgot-password"
+                  className="text-primary hover:underline"
+                >
+                  Forgot Password?
+                </a>
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>

@@ -411,7 +411,7 @@ function TaskPage() {
             <DataTable
               columns={taskColumns}
               data={todoTasks}
-              onRowClick={(row) => console.log("Go to tasks page for", row._id)}
+              onRowClick={(row) => navigate(`/task/${row._id}`)}
             />
           </div>
         )}
@@ -423,7 +423,7 @@ function TaskPage() {
             <DataTable
               columns={taskColumns}
               data={in_progress}
-              onRowClick={(row) => console.log("Go to tasks page for", row.id)}
+              onRowClick={(row) => navigate(`/task/${row._id}`)}
             />
           </div>
         )}
@@ -435,7 +435,7 @@ function TaskPage() {
             <DataTable
               columns={taskColumns}
               data={completedTasks}
-              onRowClick={(row) => console.log("Go to tasks page for", row.id)}
+              onRowClick={(row) => navigate(`/task/${row._id}`)}
             />
           </div>
         )}

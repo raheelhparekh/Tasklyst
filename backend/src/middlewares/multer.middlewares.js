@@ -16,8 +16,8 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'avatars', // Folder name in Cloudinary
-    allowed_formats: ['jpg', 'jpeg', 'png'],
+    folder: 'attachments',
+    allowed_formats: ['jpg', 'jpeg', 'png','pdf', 'docx', 'xlsx', 'pptx'], // Allowed file formats
     transformation: [{ width: 500, height: 500, crop: 'limit' }],
   },
 });

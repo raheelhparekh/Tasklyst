@@ -20,11 +20,14 @@ export const useTaskStore = create((set) => ({
       const res = await axiosInstance.post(
         `/task/create-task/${projectId}`,
         data,
+        { headers: { "Content-Type": "multipart/form-data" } },
       );
-      toast.success(res.data.message || "Task created successfully");
+      console.log("createTask response", res.data);
+
       set((state) => ({
-        tasks: [...state.tasks, res.data.task],
+        tasks: [...state.tasks, res.data.tasks],
       }));
+      toast.success(res.data.message || "Task created successfully");
     } catch (error) {
       console.error("Error creating task:", error);
       toast.error(error.response?.data?.message || "Failed to create task");
@@ -86,21 +89,18 @@ export const useTaskStore = create((set) => ({
     }
   },
 
-  getTaskById:async(id) => {
+  getTaskById: async (id) => {
     try {
       set({ isFetchingTaskById: true });
       const res = await axiosInstance.get(`/task/${id}`);
       console.log("getTaskById response", res.data.data);
       set({ task: res.data.data || [] });
       // toast.success(res.data.message || "Task fetched successfully");
-      
     } catch (error) {
       console.error("Error fetching task by id:", error);
       toast.error(error.response?.data?.message || "Failed to fetch task");
       set({ task: [] });
-      
-    }
-    finally {
+    } finally {
       set({ isFetchingTaskById: false });
     }
   },

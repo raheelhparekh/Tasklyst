@@ -12,7 +12,7 @@ import upload from "../middlewares/multer.middlewares.js";
 
 const taskRoutes = Router();
 
-taskRoutes.post("/create-task/:projectId",isLoggedIn, upload.single('attachments') ,createTask);
+taskRoutes.post("/create-task/:projectId",isLoggedIn, upload.array('attachments',10) ,createTask);
 
 taskRoutes.put("/update-task/:taskId", isLoggedIn, updateTask);
 

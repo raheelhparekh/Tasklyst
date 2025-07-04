@@ -30,7 +30,7 @@ const signupSchema = z.object({
 });
 
 export default function SignupPage() {
-  const { signup, isSigningUp } = useAuthStore(); // you should define `signup` in the store
+  const { signup, isSigningUp } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -70,6 +70,7 @@ export default function SignupPage() {
                 id="username"
                 type="text"
                 placeholder="johndoe"
+                className="mt-1"
                 {...register("username")}
               />
               {errors.username && (
@@ -85,6 +86,7 @@ export default function SignupPage() {
                 id="email"
                 type="email"
                 placeholder="you@example.com"
+                className="mt-1"
                 {...register("email")}
               />
               {errors.email && (
@@ -100,6 +102,7 @@ export default function SignupPage() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  className="mt-1 pr-10"
                   placeholder="••••••"
                   {...register("password")}
                 />
@@ -132,6 +135,18 @@ export default function SignupPage() {
                 "Sign Up"
               )}
             </Button>
+
+            <div>
+              <p className="text-sm text-center text-gray-500 mt-4">
+                Already have an account?{" "}
+                <a
+                  href="/login"
+                  className="text-primary hover:underline"
+                >
+                  Login here
+                </a>
+              </p>
+            </div>
           </form>
         </CardContent>
       </Card>
