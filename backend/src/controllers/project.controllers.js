@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/api-response.js";
 import { ProjectMember } from "../models/projectmember.models.js";
 import { Task } from "../models/task.models.js";
 import { User } from "../models/user.models.js";
+import { Note } from "../models/note.models.js";
 
 // get all projects of user
 const getAllProjectsOfUser = asyncHandler(async (req, res) => {

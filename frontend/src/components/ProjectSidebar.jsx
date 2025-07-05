@@ -20,6 +20,7 @@ import { Plus, X } from "lucide-react";
 import CreateNewTask from "@/components/CreateNewTask";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useEffect, useState } from "react";
+import { Drawer } from "./ui/drawer";
 
 export default function ProjectSidebar({
   onClose,
@@ -30,6 +31,7 @@ export default function ProjectSidebar({
   const { id } = useParams();
   const { getProjectById, project } = useProjectStore();
   const [projectName, setProjectName] = useState("Loading...");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -51,9 +53,13 @@ export default function ProjectSidebar({
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-lg font-semibold">{projectName}</h2>
         <div className="flex items-center gap-2">
-          <Dialog>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(true)}
+              >
                 <Plus size={18} />
               </Button>
             </DialogTrigger>
@@ -64,7 +70,10 @@ export default function ProjectSidebar({
                   Fill in the details to add a new task to this project.
                 </DialogDescription>
               </DialogHeader>
-              <CreateNewTask members={members} />
+              <CreateNewTask
+                members={members}
+                onClose={() => setIsOpen(false)}
+              />
             </DialogContent>
           </Dialog>
           {onClose && (

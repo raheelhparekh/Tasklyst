@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,16 +15,18 @@ import { DatePicker } from "@/components/DatePicker";
 import { useParams } from "react-router-dom";
 import { useTaskStore } from "@/store/useTaskStore";
 
-//TODO: after creating task the button should close automatically.
 export default function CreateNewTask({ onClose, members }) {
   const { id } = useParams();
   const { createTask } = useTaskStore();
+
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const {
     register,
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -36,21 +39,19 @@ export default function CreateNewTask({ onClose, members }) {
     formData.append("priority", data.priority || "medium");
     formData.append(
       "dueDate",
-      data.dueDate ? data.dueDate.toISOString() : null,
+      data.dueDate ? data.dueDate.toISOString() : null
     );
 
-    if (data.attachments?.length > 0) {
-      Array.from(data.attachments).forEach((file) => {
+    if (selectedFiles.length > 0) {
+      selectedFiles.forEach((file) => {
         formData.append("attachments", file);
       });
     }
 
-    console.log("Final form data:", Object.fromEntries(formData));
-
     try {
       await createTask(formData, id);
-      // console.log("Task created successfully");
       reset();
+      setSelectedFiles([]);
       onClose?.();
     } catch (error) {
       console.error("Error creating task:", error);
@@ -146,21 +147,46 @@ export default function CreateNewTask({ onClose, members }) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="attachment">Attachment</Label>
+        <Label htmlFor="attachment">Attachments</Label>
         <Input
           id="attachment"
           type="file"
-          accept="image/*,application/pdf,.doc,.docx,.txt"
           multiple
-          {...register("attachments")}
+          accept="image/*,application/pdf,.doc,.docx,.txt"
+          onChange={(e) => {
+            const newFiles = Array.from(e.target.files);
+            const updatedFiles = [...selectedFiles, ...newFiles];
+            setSelectedFiles(updatedFiles);
+            setValue("attachments", updatedFiles);
+          }}
         />
+
+        {/* Display selected files */}
+        <div className="mt-2 space-y-1 max-h-36 overflow-y-auto">
+          {selectedFiles.map((file, idx) => (
+            <div key={idx} className="flex justify-between items-center text-sm">
+              <span className="truncate max-w-[240px] ml-3">{file.name}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  const filtered = selectedFiles.filter((_, i) => i !== idx);
+                  setSelectedFiles(filtered);
+                  setValue("attachments", filtered);
+                }}
+                className="text-red-500 text-xs ml-2"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit">Create</Button>
+        <Button type="submit" onClick={onClose}>Create</Button>
       </div>
     </form>
   );

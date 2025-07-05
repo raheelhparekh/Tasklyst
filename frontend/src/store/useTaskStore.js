@@ -25,7 +25,7 @@ export const useTaskStore = create((set) => ({
       console.log("createTask response", res.data);
 
       set((state) => ({
-        tasks: [...state.tasks, res.data.tasks],
+        tasks: [...state.tasks, res.data.task],
       }));
       toast.success(res.data.message || "Task created successfully");
     } catch (error) {
@@ -122,6 +122,41 @@ export const useTaskStore = create((set) => ({
       toast.error(error.response?.data?.message || "Failed to delete task");
     } finally {
       set({ isDeletingTask: false });
+    }
+  },
+
+  updateTaskStatus: async (id, status) => {
+    try {
+      set({ isUpdatingTask: true });
+      console.log("Updating task status for id:", id, "to status:", status);
+      const res = await axiosInstance.put(
+        `/task/update-task-status/${id}`,
+        status,
+      );
+      console.log("updateTaskStatus response", res.data.data);
+      toast.success(res.data.message || "Task status updated successfully");
+
+      set((state) => ({
+        tasks: state.tasks.map((task) =>
+          task._id === id ? { ...task, status } : task,
+        ),
+        todoTasks: state.todoTasks.map((task) =>
+          task._id === id ? { ...task, status } : task,
+        ),
+        in_progress: state.in_progress.map((task) =>
+          task._id === id ? { ...task, status } : task,
+        ),
+        completedTasks: state.completedTasks.map((task) =>
+          task._id === id ? { ...task, status } : task,
+        ),
+      }));
+    } catch (error) {
+      console.error("Error updating task status:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to update task status",
+      );
+    } finally {
+      set({ isUpdatingTask: false });
     }
   },
 }));

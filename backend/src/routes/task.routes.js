@@ -1,7 +1,7 @@
 import Router from "express";
 import {
   createTask,
-  updateTask,
+  updateTaskStatus,
   deleteTask,
   getAllTasksOfProject,
   getTaskById,
@@ -14,7 +14,7 @@ const taskRoutes = Router();
 
 taskRoutes.post("/create-task/:projectId",isLoggedIn, upload.array('attachments',10) ,createTask);
 
-taskRoutes.put("/update-task/:taskId", isLoggedIn, updateTask);
+taskRoutes.put("/update-task-status/:taskId", isLoggedIn, updateTaskStatus);
 
 taskRoutes.delete("/delete-task/:taskId",isLoggedIn, deleteTask);
 

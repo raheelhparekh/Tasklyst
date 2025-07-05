@@ -169,8 +169,7 @@ export default function ProjectPage() {
       <ProjectPageControls search={search} setSearch={setSearch} />
       <DataTable
         columns={columns}
-        data={filteredData}
-        onRowClick={(row) => navigate(`/project/${row._id}/task`)}
+        data={filteredData}       
       />
     </div>
   );

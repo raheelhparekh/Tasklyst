@@ -19,63 +19,62 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useTaskStore } from "@/store/useTaskStore";
+import { Input } from "@/components/ui/input";
 import { useParams } from "react-router-dom";
+import { useTaskStore } from "@/store/useTaskStore";
 import { useNoteStore } from "@/store/useNoteStore";
-
-// const dummyTask = {
-//   title: "Design Landing Page",
-//   description: "Create a modern, responsive UI for the landing page.",
-//   status: "in-progress",
-//   priority: "high",
-//   dueDate: "2025-07-10",
-//   notes: [
-//     { user: "Alice", message: "Let's keep the hero section minimal.", timestamp: "2025-06-25" },
-//     { user: "Bob", message: "Added CTA animations.", timestamp: "2025-06-26" },
-//     { user: "Charlie", message: "Mobile view needs polish.", timestamp: "2025-06-27" },
-//   ],
-//   attachments: [
-//     { name: "wireframe.pdf", url: "https://example.com/wireframe.pdf" },
-//     { name: "logo.png", url: "https://example.com/logo.png" },
-//   ],
-//   checklist: [
-//     { title: "Design Hero section", completed: true },
-//     { title: "Footer design", completed: false },
-//     { title: "Mobile responsiveness", completed: false },
-//   ],
-//   tags: ["UI", "Frontend", "Design"],
-// };
+import { useSubtaskStore } from "@/store/useSubtaskStore";
+import { File, FileText, Plus, Trash } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function TaskByIdPage() {
   const [status, setStatus] = useState("");
   const [noteInput, setNoteInput] = useState("");
-  const [notes, setNotes] = useState([]);
-  const { task, getTaskById } = useTaskStore();
-  const { taskNotes, getAllTaskNotes, createTaskNote } = useNoteStore();
+  const [subtaskInput, setSubtaskInput] = useState("");
+
   const { id } = useParams();
 
-  // console.log("Task data:", task);
-
-  const handleNoteSubmit = async () => {
-    try {
-      // console.log("noteInput", noteInput);
-      const newNote = await createTaskNote(noteInput, id);
-      setNotes([...notes, newNote]);
-      setNoteInput("");
-    } catch (error) {
-      console.error("Error creating note:", error);
-    }
-  };
+  const { task, getTaskById, updateTaskStatus } = useTaskStore();
+  const { taskNotes, getAllTaskNotes, createTaskNote } = useNoteStore();
+  const {
+    subtasks,
+    getSubtasks,
+    createSubtask,
+    isFetchingSubtasks,
+    updateSubtask,
+    deleteSubtask,
+  } = useSubtaskStore();
 
   useEffect(() => {
     getTaskById(id);
     getAllTaskNotes(id);
-  }, [getAllTaskNotes]);
+    getSubtasks(id);
+  }, [id, getTaskById, getAllTaskNotes, getSubtasks]);
+
+  const handleNoteSubmit = async () => {
+    if (!noteInput.trim()) return;
+    await createTaskNote(noteInput, id);
+    setNoteInput("");
+  };
+
+  const handleAddSubtask = async () => {
+    await createSubtask({ title: subtaskInput }, id);
+    setSubtaskInput("");
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      if (!newStatus || newStatus === status) return; // No change in status
+      setStatus(newStatus);
+      await updateTaskStatus(id, { status: newStatus });
+    } catch (error) {
+      console.error("Error updating task status:", error);
+    }
+  };
 
   return (
     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Left Side */}
-      
       <div className="space-y-4">
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
@@ -92,11 +91,12 @@ export default function TaskByIdPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
         <div>
           <h2 className="text-2xl font-semibold">{task.title}</h2>
           <p className="text-muted-foreground mt-1">{task.description}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Due:{new Date(task.dueDate).toLocaleDateString("en-US")}
+            Due Date: {new Date(task.dueDate).toLocaleDateString("en-US")}
           </p>
 
           <div className="flex items-center gap-2 mt-3">
@@ -112,13 +112,13 @@ export default function TaskByIdPage() {
               {task.priority}
             </Badge>
 
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={handleStatusChange}>
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder={task.status} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todo">Todo</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
@@ -127,14 +127,27 @@ export default function TaskByIdPage() {
 
         <Separator />
 
+        {/* Notes */}
         <div>
           <h3 className="text-lg font-medium mb-2">Notes</h3>
           <div className="max-h-64 overflow-y-auto flex flex-col gap-3 pr-2">
             {taskNotes.map((note, index) => (
               <Card key={index} className="bg-muted p-3">
-                <p className="text-sm font-semibold">
-                  {note.createdBy.username}
-                </p>
+
+                <div className="flex items-center gap-2">
+                  <Avatar>
+                    <AvatarImage
+                      src={note.createdBy?.avatar}
+                      alt={note.createdBy?.username}
+                    />
+                    <AvatarFallback className="bg-white text-black">
+                      {note.createdBy?.username?.[0] ?? "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">
+                    {note.createdBy?.username}
+                  </span>
+                </div>
                 <p className="text-sm text-muted-foreground">{note.content}</p>
                 <p className="text-xs text-gray-400">
                   {note.createdAt.split("T")[0]}
@@ -156,23 +169,33 @@ export default function TaskByIdPage() {
       </div>
 
       {/* Right Side */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Attachments */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex items-center justify-between">
             <CardTitle>Attachments</CardTitle>
+            <Button variant="outline" className="">
+              <Plus className="w-4 h-4 mr-2" />
+              Add File
+            </Button>
           </CardHeader>
           <CardContent>
-            {task.attachments > 0 ? (
+            {task.attachments?.length > 0 ? (
               task.attachments.map((file, index) => (
                 <a
                   key={index}
                   href={file.url}
+                  download
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-blue-600 hover:underline text-sm mb-2"
+                  className="flex items-center gap-2 text-blue-600 hover:underline text-sm mb-2"
                 >
-                  {file.name}
+                  {file.mimeType?.includes("pdf") ? (
+                    <FileText className="w-4 h-4 text-red-500" />
+                  ) : (
+                    <File className="w-4 h-4 text-gray-500" />
+                  )}
+                  {file.name || "View file"}
                 </a>
               ))
             ) : (
@@ -181,35 +204,69 @@ export default function TaskByIdPage() {
           </CardContent>
         </Card>
 
-        {/* Checklist */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Checklist</CardTitle>
+        {/* Subtasks */}
+        <Card className="space-y-4 ">
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Subtasks</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {task.checklist.map((item, index) => (
-              <div key={index} className="text-sm">
-                <span className={item.completed ? "line-through text-muted-foreground" : ""}>
-                  • {item.title}
-                </span>
-              </div>
-            ))}
-          </CardContent>
-        </Card> */}
+          <CardContent className="space-y-3">
+            {isFetchingSubtasks ? (
+              <p className="text-sm text-muted-foreground">
+                Loading subtasks...
+              </p>
+            ) : subtasks.length > 0 ? (
+              subtasks.map((subtask) => (
+                <div
+                  key={subtask._id}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={subtask.isCompleted}
+                      onChange={() =>
+                        updateSubtask(subtask._id, {
+                          isCompleted: !subtask.isCompleted,
+                        })
+                      }
+                      className="h-4 w-4"
+                    />
+                    <span
+                      className={
+                        subtask.isCompleted
+                          ? "line-through text-muted-foreground"
+                          : ""
+                      }
+                    >
+                      {subtask.title}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteSubtask(subtask._id)}
+                  >
+                    <Trash className="h-4 w-4 text-red-500" />
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No subtasks found.
+              </p>
+            )}
 
-        {/* Tags */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Tags</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {task.tags.map((tag, index) => (
-              <Badge key={index} variant="secondary">
-                {tag}
-              </Badge>
-            ))}
+            <div className="flex gap-2 mt-10">
+              <Input
+                value={subtaskInput}
+                onChange={(e) => setSubtaskInput(e.target.value)}
+                placeholder="New subtask title"
+                className="flex-1"
+              />
+              <Button onClick={handleAddSubtask}>Add</Button>
+            </div>
           </CardContent>
-        </Card>  */}
+        </Card>
       </div>
     </div>
   );

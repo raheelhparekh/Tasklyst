@@ -48,7 +48,7 @@ const createTask = asyncHandler(async (req, res) => {
       url: file.path,
       mimeType: file.mimetype,
       size: file.size,
-      filename: file.originalname,
+      name: file.originalname,
     })) || [];
 
 
@@ -77,10 +77,10 @@ const createTask = asyncHandler(async (req, res) => {
   }
 });
 
-const updateTask = asyncHandler(async (req, res) => {
+const updateTaskStatus = asyncHandler(async (req, res) => {
   try {
     const { taskId } = req.params;
-    const { title, description, email, attachments } = req.body;
+    const { status } = req.body;
 
     const user = req.user;
     console.log("this task is updated by user name:", user.username);
@@ -89,36 +89,31 @@ const updateTask = asyncHandler(async (req, res) => {
     if (!task) {
       throw new ApiError(404, "Task not found");
     }
-    console.log("task details------", task);
+    // console.log("task details------", task);
 
-    const assignedTo = await User.findOne({ email });
-    console.log("userAssignedTo", assignedTo);
-    console.log("task is assigned to user name :", assignedTo.username);
+    // const assignedTo = await User.findOne({ email });
+    // console.log("userAssignedTo", assignedTo);
+    // console.log("task is assigned to user name :", assignedTo.username);
 
     // Check if the user is authorized to update the task , only the creator can update or the project admin
-    if (
-      task.assignedBy.toString() !== req.user.id &&
-      req.user.role !== "ADMIN"
-    ) {
-      throw new ApiError(403, "You are not authorized to update this task");
-    }
+    // if (
+    //   task.assignedBy.toString() !== req.user.id &&
+    //   req.user.role !== "ADMIN"
+    // ) {
+    //   throw new ApiError(403, "You are not authorized to update this task");
+    // }
 
     const updateTask = await Task.findByIdAndUpdate(
       taskId,
       {
-        title: title || task.title,
-        description: description || task.description,
-        assignedTo: assignedTo || task.assignedTo,
-        attachments: attachments || task.attachments,
+        status: status || task.status,
       },
       { new: true },
     );
 
-    return res.status(200).json({
-      success: true,
-      message: "Task updated successfully",
-      task: updateTask,
-    });
+    return res.status(200).json(
+      new ApiResponse(200, updateTask, "Task updated successfully"),
+    );
   } catch (error) {
     console.error("Error updating task:", error);
     throw new ApiError(500, "Internal Server Error while updating task");
@@ -239,7 +234,7 @@ const getAllTaskAssignedToUser = asyncHandler(async (req, res) => {
 
 export {
   createTask,
-  updateTask,
+  updateTaskStatus,
   deleteTask,
   getAllTasksOfProject,
   getTaskById,
