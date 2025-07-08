@@ -69,7 +69,7 @@ export default function HomePage() {
         </div>
       </BackgroundLines>
 
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 1.2 }}
@@ -85,7 +85,7 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-70 group-hover:opacity-90 transition rounded-xl" />
         </div>
-      </motion.div>
+      </motion.div> */}
     </>
   );
 }
