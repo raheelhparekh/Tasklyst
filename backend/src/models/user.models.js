@@ -37,12 +37,12 @@ const userSchema = new Schema(
       type: Boolean,
       default: "false",
     },
-    role: {
-      type: String,
-      enum: AvailableUserRolesEnum, // array hona chahiye
-      default: UserRolesEnums.MEMBER, // default role
-    },
-
+    // role: {
+    //   type: String,
+    //   enum: AvailableUserRolesEnum, // array hona chahiye
+    //   default: UserRolesEnums.MEMBER, // default role
+    // },
+    
     forgotPasswordToken: {
       type: String,
     },
