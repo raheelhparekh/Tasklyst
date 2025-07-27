@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { AvailableUserRolesEnum, UserRolesEnums } from "../utils/constants.js";
 import {
   createNote,
   deleteNote,
@@ -8,60 +7,62 @@ import {
   getTaskNotes,
   updateNote,
 } from "../controllers/note.controllers.js";
-import {
-  isLoggedIn,
-  validateProjectPermission,
-} from "../middlewares/auth.middlewares.js";
+import { isLoggedIn } from "../middlewares/auth.middlewares.js";
+import { 
+  checkProjectPermission, 
+  checkNotePermission,
+  checkTaskPermission 
+} from "../middlewares/rbac.middlewares.js";
 
 const noteRoutes = Router();
 
 noteRoutes.get(
   "/n/:taskId",
   isLoggedIn,
+  checkTaskPermission('canViewTask'),
   getTaskNotes
 );
 
 noteRoutes.get(
   "/:projectId",
   isLoggedIn,
-  validateProjectPermission([UserRolesEnums.ADMIN, UserRolesEnums.MEMBER, UserRolesEnums.GUEST]),
+  checkProjectPermission('canViewNote'),
   getProjectNotes,
 );
 
 noteRoutes.post(
   "/:projectId/n/create-note",
   isLoggedIn,
-  // validateProjectPermission([UserRolesEnums.ADMIN, UserRolesEnums.MEMBER]),
+  checkProjectPermission('canCreateNote'),
   createNote,
 );
 
 noteRoutes.post(
   "/task/:taskId/create-note",
   isLoggedIn,
+  checkTaskPermission('canViewTask'),
   createNote,
 );
 
 noteRoutes.get(
   "/:projectId/n/:noteId",
   isLoggedIn,
-  validateProjectPermission(AvailableUserRolesEnum),
+  checkNotePermission('canViewNote'),
   getNoteById,
 );
 
 noteRoutes.put(
   "/:projectId/n/update-note/:noteId",
   isLoggedIn,
-  validateProjectPermission([UserRolesEnums.ADMIN]),
+  checkNotePermission('canUpdateNote'),
   updateNote,
 );
 
 noteRoutes.delete(
   "/:projectId/n/delete-note/:noteId",
   isLoggedIn,
-  validateProjectPermission([UserRolesEnums.ADMIN]),
+  checkNotePermission('canDeleteNote'),
   deleteNote,
 );
-
-
 
 export default noteRoutes;

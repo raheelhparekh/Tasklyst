@@ -1,11 +1,10 @@
-import mongoose,{Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const projectSchema = new Schema(
   {
     name: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
     description: {
@@ -21,5 +20,8 @@ const projectSchema = new Schema(
     timestamps: true,
   },
 );
+
+// Create compound index to ensure unique project names per user
+projectSchema.index({ name: 1, createdBy: 1 }, { unique: true });
 
 export const Project = mongoose.model("Project", projectSchema);

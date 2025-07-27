@@ -11,7 +11,7 @@ const userSchema = new Schema(
         url: String,
       },
       default: {
-        url: "https://placehold.co/600x400"
+        url: "https://placehold.co/600x400",
       },
     },
     username: {
@@ -30,19 +30,18 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      unique: true,
       required: true,
     },
     isEmailVerified: {
       type: Boolean,
-      default: "false",
+      default: false,
     },
     // role: {
     //   type: String,
     //   enum: AvailableUserRolesEnum, // array hona chahiye
     //   default: UserRolesEnums.MEMBER, // default role
     // },
-    
+
     forgotPasswordToken: {
       type: String,
     },
