@@ -14,8 +14,8 @@ export default function Footer() {
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <div className="size-6 rounded-full bg-gradient-to-br from-violet-500 to-pink-500" />
-            <span className="text-xl font-semibold tracking-tight text-black dark:text-white">
+            <div className="size-6 rounded-full bg-gradient-to-br from-violet-900 to-pink-500" />
+            <span className="text-xl font-semibold tracking-tight text-violet-900 dark:text-violet-100">
               Tasklyst
             </span>
           </div>
@@ -26,13 +26,22 @@ export default function Footer() {
 
         {/* Center: Navigation */}
         <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-300">
-          <button onClick={() => navigate("/")} className="hover:text-violet-500 transition">
+          <button
+            onClick={() => navigate("/")}
+            className="hover:text-violet-500 transition"
+          >
             Home
           </button>
-          <button onClick={() => navigate("/projects")} className="hover:text-violet-500 transition">
+          <button
+            onClick={() => navigate("/projects")}
+            className="hover:text-violet-500 transition"
+          >
             Projects
           </button>
-          <button onClick={() => navigate("/contact")} className="hover:text-violet-500 transition">
+          <button
+            onClick={() => navigate("/contact")}
+            className="hover:text-violet-500 transition"
+          >
             Contact
           </button>
         </div>
@@ -40,12 +49,20 @@ export default function Footer() {
         {/* Right: Socials */}
         <div className="flex gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <a href="https://github.com/raheelhparekh" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://github.com/raheelhparekh"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Github className="h-5 w-5 text-gray-600 dark:text-gray-300 hover:text-violet-500 transition" />
             </a>
           </Button>
           <Button variant="ghost" size="icon" asChild>
-            <a href="https://linkedin.com/in/raheelhparekh" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://linkedin.com/in/raheelhparekh"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Linkedin className="h-5 w-5 text-gray-600 dark:text-gray-300 hover:text-violet-500 transition" />
             </a>
           </Button>

@@ -12,6 +12,13 @@ import Layout from "./components/Layout";
 import TaskByIdPage from "./pages/TaskByIdPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import ErrorBoundary from "./components/ErrorBoundary";
+
+// Protected Route wrapper
+const ProtectedRoute = ({ children }) => {
+  const { authUser } = useAuthStore();
+  return authUser ? children : <Navigate to="/login" replace />;
+};
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -29,36 +36,42 @@ function App() {
   }
 
   return (
-    <Routes>
-      {/* Layout-wrapped routes */}
-      <Route path="/" element={<Layout />}>
-        <Route index element={<HomePage />} />
-        <Route path="/project/:id/task" element={<TaskPage />} />
-        <Route path="/task/:id" element={<TaskByIdPage />} />
-        <Route path="/projects" element={<ProjectPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-      </Route>
+    <ErrorBoundary>
+      <Routes>
+        {/* Layout-wrapped routes - All protected */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<HomePage />} />
+          <Route path="/project/:id/task" element={<TaskPage />} />
+          <Route path="/task/:id" element={<TaskByIdPage />} />
+          <Route path="/projects" element={<ProjectPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
 
-      {/* Standalone pages (like auth) */}
-      <Route
-        path="/login"
-        element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
-      />
-      <Route
-        path="/signup"
-        element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
-      />
+        {/* Standalone pages (like auth) */}
+        <Route
+          path="/login"
+          element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
+        />
+        <Route
+          path="/signup"
+          element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
+        />
 
-      <Route
-        path="/forgot-password"
-        element={<ForgotPassword />}
-      />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      <Route
-        path="/reset-password/:token"
-        element={<ResetPassword />}
-      />
-    </Routes>
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+        {/* Catch all route */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   );
 }
 

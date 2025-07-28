@@ -4,13 +4,17 @@ import { toast } from "sonner";
 
 export const useProjectStore = create((set) => ({
   projects: [],
-  project: [],
+  project: null,
   members: [],
   isFetchingAllProjects: false,
   isFetchingProjectById: false,
   isCreatingProject: false,
   isUpdatingProject: false,
   isDeletingProject: false,
+  isFetchingMembers: false,
+  isAddingMember: false,
+  isUpdatingMemberRole: false,
+  isDeletingMember: false,
 
   getAllProjects: async () => {
     try {
@@ -69,7 +73,7 @@ export const useProjectStore = create((set) => ({
     } catch (error) {
       console.error("Error fetching project by id:", error);
       toast.error("Failed to fetch project by id");
-      set({ project: [] });
+      set({ project: null });
     } finally {
       set({ isFetchingProjectById: false });
     }
@@ -83,25 +87,38 @@ export const useProjectStore = create((set) => ({
       const newProject = res.data.data;
 
       // Fetch members count
-      const countRes = await axiosInstance.get(
-        `/project/get-all-members/${newProject._id}`,
-      );
+      try {
+        const countRes = await axiosInstance.get(
+          `/project/get-all-members/${newProject._id}`,
+        );
+        
+        const newProjectWithMembers = {
+          ...newProject,
+          members: countRes.data.data || 1, // Creator is automatically added as member
+        };
 
-      const newProjectWithMembers = {
-        ...newProject,
-        members: countRes.data.data || 0,
-      };
-
-      // Add to state
-      set((state) => ({
-        projects: [...state.projects, newProjectWithMembers],
-      }));
+        // Add to state
+        set((state) => ({
+          projects: [...state.projects, newProjectWithMembers],
+        }));
+      } catch (memberError) {
+        console.error("Error fetching members count for new project:", memberError);
+        // Still add the project but with default member count
+        const newProjectWithMembers = {
+          ...newProject,
+          members: 1, // Creator is automatically added as member
+        };
+        
+        set((state) => ({
+          projects: [...state.projects, newProjectWithMembers],
+        }));
+      }
 
       toast.success(res.data.message || "Project created successfully");
     } catch (error) {
       console.error("Error creating project:", error);
-      toast.error("Failed to create project");
-      set({ projects: [] });
+      const errorMessage = error.response?.data?.message || "Failed to create project";
+      toast.error(errorMessage);
     } finally {
       set({ isCreatingProject: false });
     }
@@ -116,16 +133,20 @@ export const useProjectStore = create((set) => ({
         data,
       );
       console.log("updateProject response", res.data.data);
+      
+      const updatedProject = res.data.data;
+      
       set((state) => ({
         projects: state.projects.map((project) =>
-          project._id === id ? res.data.data : project,
+          project._id === id ? { ...project, ...updatedProject } : project,
         ),
-        project: res.data.data,
+        project: state.project && state.project._id === id ? updatedProject : state.project,
       }));
       toast.success(res.data.message || "Project updated successfully");
     } catch (error) {
       console.error("Error updating project:", error);
-      toast.error("Failed to update project");
+      const errorMessage = error.response?.data?.message || "Failed to update project";
+      toast.error(errorMessage);
     } finally {
       set({ isUpdatingProject: false });
     }
@@ -139,11 +160,13 @@ export const useProjectStore = create((set) => ({
 
       set((state) => ({
         projects: state.projects.filter((project) => project._id !== id),
+        project: state.project && state.project._id === id ? null : state.project,
       }));
       toast.success(res.data.message || "Project deleted successfully");
     } catch (error) {
       console.error("Error deleting project:", error);
-      toast.error("Failed to delete project");
+      const errorMessage = error.response?.data?.message || "Failed to delete project";
+      toast.error(errorMessage);
     } finally {
       set({ isDeletingProject: false });
     }
@@ -151,6 +174,7 @@ export const useProjectStore = create((set) => ({
 
   getAllMembersDetails: async (id) => {
     try {
+      set({ isFetchingMembers: true });
       const res = await axiosInstance.get(
         `/project/get-all-members-details/${id}`,
       );
@@ -161,13 +185,17 @@ export const useProjectStore = create((set) => ({
       // toast.success(res.data.message || "Members details fetched successfully");
     } catch (error) {
       console.error("Error fetching members details:", error);
-      toast.error("Failed to fetch members details");
+      const errorMessage = error.response?.data?.message || "Failed to fetch members details";
+      toast.error(errorMessage);
       set({ members: [] });
+    } finally {
+      set({ isFetchingMembers: false });
     }
   },
 
   changeMemberRole: async (memberId, role) => {
     try {
+      set({ isUpdatingMemberRole: true });
       const res = await axiosInstance.put(
         `/project/update-member-role/${memberId}`,
         { role },
@@ -184,28 +212,50 @@ export const useProjectStore = create((set) => ({
       }));
     } catch (error) {
       console.error("Error changing member role:", error);
-      toast.error("Failed to change member role");
+      const errorMessage = error.response?.data?.message || "Failed to change member role";
+      toast.error(errorMessage);
+    } finally {
+      set({ isUpdatingMemberRole: false });
     }
   },
   deleteProjectMember: async (memberId) => {
     try {
+      set({ isDeletingMember: true });
       const res = await axiosInstance.delete(
         `/project/delete-member/${memberId}`,
       );
       console.log("deleteProjectMember response", res.data.data);
       toast.success(res.data.message || "Project member deleted successfully");
-      // Remove the member from the state
-      set((state) => ({
-        members: state.members.filter((member) => member._id !== memberId),
-      }));
+      
+      // Remove the member from the state and update project member count
+      set((state) => {
+        const updatedMembers = state.members.filter((member) => member._id !== memberId);
+        const deletedMember = state.members.find((member) => member._id === memberId);
+        
+        // If we know which project this member belonged to, update the count
+        const updatedProjects = deletedMember ? state.projects.map((project) => 
+          project._id === deletedMember.project 
+            ? { ...project, members: Math.max(0, project.members - 1) }
+            : project
+        ) : state.projects;
+        
+        return {
+          members: updatedMembers,
+          projects: updatedProjects,
+        };
+      });
     } catch (error) {
       console.error("Error deleting project member:", error);
-      toast.error("Failed to delete project member");
+      const errorMessage = error.response?.data?.message || "Failed to delete project member";
+      toast.error(errorMessage);
+    } finally {
+      set({ isDeletingMember: false });
     }
   },
 
   addMemberToProject: async (projectId, memberData) => {
     try {
+      set({ isAddingMember: true });
       const res = await axiosInstance.post(
         `/project/add-member/${projectId}`,
         memberData,
@@ -225,8 +275,31 @@ export const useProjectStore = create((set) => ({
       
     } catch (error) {
       console.error("Error adding member to project:", error);
-      toast.error("Failed to add member to project");
-      
+      const errorMessage = error.response?.data?.message || "Failed to add member to project";
+      toast.error(errorMessage);
+    } finally {
+      set({ isAddingMember: false });
     }
-  }
+  },
+
+  // Add method to get project members count
+  getProjectMembersCount: async (projectId) => {
+    try {
+      const res = await axiosInstance.get(`/project/get-all-members/${projectId}`);
+      return res.data.data || 0;
+    } catch (error) {
+      console.error("Error fetching project members count:", error);
+      return 0;
+    }
+  },
+
+  // Clear project data (useful for cleanup)
+  clearProject: () => {
+    set({ project: null });
+  },
+
+  // Clear members data (useful for cleanup)
+  clearMembers: () => {
+    set({ members: [] });
+  },
 }));

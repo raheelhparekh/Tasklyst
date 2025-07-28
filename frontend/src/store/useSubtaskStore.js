@@ -1,4 +1,4 @@
-import { axiosInstance } from "../lib/axios.js";
+import { axiosInstance } from "@/lib/axios";
 import { create } from "zustand";
 import { toast } from "sonner";
 
