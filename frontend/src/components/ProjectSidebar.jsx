@@ -49,9 +49,9 @@ export default function ProjectSidebar({
   }, [project]);
 
   return (
-    <div className="w-64 h-full border-r border-gray-200 dark:border-gray-800 bg-background p-4 flex flex-col">
+    <div className="w-64 h-full border-r border-violet-200 dark:border-violet-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-4 flex flex-col">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold">{projectName}</h2>
+        <h2 className="text-lg font-semibold text-violet-900 dark:text-violet-100">{projectName}</h2>
         <div className="flex items-center gap-2">
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
@@ -59,11 +59,12 @@ export default function ProjectSidebar({
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(true)}
+                className="hover:bg-violet-100 dark:hover:bg-violet-900 text-violet-600 dark:text-violet-400"
               >
                 <Plus size={18} />
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="border-violet-200 dark:border-violet-800">
               <DialogHeader>
                 <DialogTitle>Create a new Task?</DialogTitle>
                 <DialogDescription>
@@ -77,14 +78,19 @@ export default function ProjectSidebar({
             </DialogContent>
           </Dialog>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onClose}
+              className="hover:bg-violet-100 dark:hover:bg-violet-900 text-violet-600 dark:text-violet-400"
+            >
               <X size={18} />
             </Button>
           )}
         </div>
       </div>
 
-      <Separator className="my-4" />
+      <Separator className="my-4 bg-violet-200 dark:bg-violet-800" />
 
       {/* Sections */}
       <SidebarSection
@@ -128,7 +134,11 @@ function SidebarSection({ title, value, activeTab, setActiveTab }) {
       <CollapsibleTrigger asChild>
         <Button
           variant={isActive ? "secondary" : "ghost"}
-          className="w-full justify-start font-medium"
+          className={`w-full justify-start font-medium transition-colors ${
+            isActive 
+              ? "bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 text-violet-900 dark:text-violet-100" 
+              : "hover:bg-violet-50 dark:hover:bg-violet-950 text-violet-700 dark:text-violet-300"
+          }`}
           onClick={() => setActiveTab(value)}
         >
           {title}

@@ -22,7 +22,7 @@ export default function ProjectPageControls({ search, setSearch }) {
       <Input
         type="text"
         placeholder="Search project name..."
-        className="w-full md:w-1/3"
+        className="w-full md:w-1/3 border-violet-200 focus:border-violet-400 dark:border-violet-800 dark:focus:border-violet-600"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
@@ -32,7 +32,7 @@ export default function ProjectPageControls({ search, setSearch }) {
         <DialogTrigger>
           <Button variant="outline">Create Project</Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="border-violet-200 dark:border-violet-800">
           <DialogHeader>
             <DialogTitle>Create a New Project?</DialogTitle>
             <DialogDescription>

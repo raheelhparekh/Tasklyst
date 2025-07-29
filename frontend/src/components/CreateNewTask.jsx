@@ -63,6 +63,7 @@ export default function CreateNewTask({ onClose, members }) {
       <Input
         placeholder="Task Title"
         {...register("title", { required: "Title is required" })}
+        className="border-violet-200 focus:border-violet-400 dark:border-violet-800 dark:focus:border-violet-600"
       />
       {errors.title && (
         <span className="text-red-500 text-sm">{errors.title.message}</span>
@@ -72,6 +73,7 @@ export default function CreateNewTask({ onClose, members }) {
         placeholder="Description"
         rows={4}
         {...register("description")}
+        className="border-violet-200 focus:border-violet-400 dark:border-violet-800 dark:focus:border-violet-600 resize-none"
       />
 
       <Controller
@@ -80,12 +82,16 @@ export default function CreateNewTask({ onClose, members }) {
         rules={{ required: "Assignee is required" }}
         render={({ field }) => (
           <Select onValueChange={field.onChange} value={field.value}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full border-violet-200 focus:border-violet-400 dark:border-violet-800 dark:focus:border-violet-600">
               <SelectValue placeholder="Assign to" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="border-violet-200 dark:border-violet-800">
               {members.map((member) => (
-                <SelectItem key={member._id} value={member.user.email}>
+                <SelectItem 
+                  key={member._id} 
+                  value={member.user.email}
+                  className="hover:bg-violet-50 dark:hover:bg-violet-950"
+                >
                   {member.user.email}
                 </SelectItem>
               ))}
@@ -105,13 +111,13 @@ export default function CreateNewTask({ onClose, members }) {
           control={control}
           render={({ field }) => (
             <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[180px] border-violet-200 focus:border-violet-400 dark:border-violet-800 dark:focus:border-violet-600">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todo">Todo</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
+              <SelectContent className="border-violet-200 dark:border-violet-800">
+                <SelectItem value="todo" className="hover:bg-violet-50 dark:hover:bg-violet-950">Todo</SelectItem>
+                <SelectItem value="in_progress" className="hover:bg-violet-50 dark:hover:bg-violet-950">In Progress</SelectItem>
+                <SelectItem value="completed" className="hover:bg-violet-50 dark:hover:bg-violet-950">Completed</SelectItem>
               </SelectContent>
             </Select>
           )}
@@ -122,13 +128,13 @@ export default function CreateNewTask({ onClose, members }) {
           control={control}
           render={({ field }) => (
             <Select onValueChange={field.onChange} value={field.value}>
-              <SelectTrigger className="w-[260px]">
+              <SelectTrigger className="w-[260px] border-violet-200 focus:border-violet-400 dark:border-violet-800 dark:focus:border-violet-600">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
+              <SelectContent className="border-violet-200 dark:border-violet-800">
+                <SelectItem value="high" className="hover:bg-violet-50 dark:hover:bg-violet-950">High</SelectItem>
+                <SelectItem value="medium" className="hover:bg-violet-50 dark:hover:bg-violet-950">Medium</SelectItem>
+                <SelectItem value="low" className="hover:bg-violet-50 dark:hover:bg-violet-950">Low</SelectItem>
               </SelectContent>
             </Select>
           )}
@@ -183,10 +189,21 @@ export default function CreateNewTask({ onClose, members }) {
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onClose}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onClose}
+          className="border-violet-200 hover:border-violet-300 hover:bg-violet-50 dark:border-violet-800 dark:hover:border-violet-700 dark:hover:bg-violet-950"
+        >
           Cancel
         </Button>
-        <Button type="submit" onClick={onClose}>Create</Button>
+        <Button 
+          type="submit" 
+          onClick={onClose}
+          className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white"
+        >
+          Create
+        </Button>
       </div>
     </form>
   );
