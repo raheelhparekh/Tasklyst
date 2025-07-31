@@ -32,12 +32,37 @@ if (missingEnvVars.length > 0) {
 
 const allowedOrigins =
   process.env.NODE_ENV === "production"
-    ? [process.env.BASE_URL]
+    ? [
+        process.env.BASE_URL,
+        "https://tasklyst-one.vercel.app", // Main domain
+        /^https:\/\/tasklyst.*\.vercel\.app$/, // Any tasklyst deployment
+        /^https:\/\/.*-raheelhparekhs-projects\.vercel\.app$/ // Your project deployments
+      ]
     : ["http://localhost:5173", "http://localhost:3000"];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, etc.)
+      if (!origin) return callback(null, true);
+      
+      if (process.env.NODE_ENV === "development") {
+        // Allow localhost in development
+        if (origin.includes("localhost")) return callback(null, true);
+      } else {
+        // Production: Allow Vercel domains
+        if (origin.includes("vercel.app") && 
+            (origin.includes("tasklyst") || origin.includes("raheelhparekhs-projects"))) {
+          return callback(null, true);
+        }
+        // Also allow specific domain if set
+        if (process.env.BASE_URL && origin === process.env.BASE_URL) {
+          return callback(null, true);
+        }
+      }
+      
+      callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
