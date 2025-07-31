@@ -60,7 +60,7 @@ function App() {
           element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
         />
         <Route
-          path="/signup"
+          path="/register"
           element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
         />
 
