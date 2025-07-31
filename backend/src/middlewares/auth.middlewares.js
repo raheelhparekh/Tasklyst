@@ -15,7 +15,7 @@ export const isLoggedIn = async (req, res, next) => {
       httpOnly: true,
       secure: isProduction, // false in dev, true in prod
       maxAge: 30 * 24 * 60 * 60 * 1000,
-      sameSite: isProduction ? "strict" : "lax", // lax allows smoother local dev
+      sameSite: isProduction ? "none" : "lax", // "none" allows cross-domain cookies
     };
 
     let user;
@@ -69,7 +69,7 @@ export const isLoggedIn = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    console.error("Auth middleware error:", err);
+    // console.error("Auth middleware error:", err); // Remove in production
     const status = err.statuscode || 500;
     return res.status(status).json({
       success: false,

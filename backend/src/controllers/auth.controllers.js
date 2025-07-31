@@ -104,14 +104,14 @@ const loginUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     secure: isProduction, // false in dev, true in prod
     maxAge: 30 * 24 * 60 * 60 * 1000,
-    sameSite: isProduction ? "strict" : "lax", // lax allows smoother local dev
+    sameSite: isProduction ? "none" : "lax", // "none" allows cross-domain cookies
   });
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: isProduction,
     maxAge: 30 * 24 * 60 * 60 * 1000,
-    sameSite: isProduction ? "strict" : "lax",
+    sameSite: isProduction ? "none" : "lax", // "none" allows cross-domain cookies
   });
 
   user.refreshToken = refreshToken;
@@ -140,12 +140,14 @@ const logoutUser = asyncHandler(async (req, res) => {
   // Clear cookies
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   res.clearCookie("accessToken", {
     httpOnly: true,
-    secure: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   // Remove refresh token from database
