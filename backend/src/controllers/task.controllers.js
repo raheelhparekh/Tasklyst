@@ -37,7 +37,6 @@ const createTask = asyncHandler(async (req, res) => {
   if (userAssignedTo._id.toString() === user._id.toString()) {
     throw new ApiError(400, "You cannot assign a task to yourself.");
   }
-  console.log("userAssignedTo", userAssignedTo);
 
   // Process uploaded attachments
   const attachments =

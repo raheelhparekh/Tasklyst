@@ -1,6 +1,7 @@
 import { create } from "zustand";
-import { axiosInstance } from "@/lib/axios";
+import { axiosInstance } from "../lib/axios";
 import { toast } from "sonner";
+import logger from "../lib/logger";
 
 export const useAuthStore = create((set) => ({
   authUser: null,
@@ -14,49 +15,41 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isCheckingAuth: true });
       const res = await axiosInstance.get("/auth/check-auth");
-      console.log("checkAuth response", res.data);
-
       set({ authUser: res.data.data });
-      // toast.success("User authenticated successfully");
-    } catch (error) {
-      console.error("Error checking auth", error);
-      toast.error("Error checking auth. Please try again.");
+    } catch {
+      // Silent fail for auth check - don't show toast on page load
       set({ authUser: null });
     } finally {
       set({ isCheckingAuth: false });
     }
   },
 
-  login: async (data) => {
+  login: async (userData) => {
     try {
       set({ isLoggingIn: true });
-      const res = await axiosInstance.post("/auth/login", data);
-
-      console.log("login response", res.data.data);
-
+      const res = await axiosInstance.post("/auth/login", userData);
       set({ authUser: res.data.data });
       toast.success(res.data.message || "Login successful");
+      logger.info("User login successful", { email: userData.email });
     } catch (error) {
-      console.error("Login error", error);
-      toast.error("Error logging in. Please try again.");
-
-      set({ authUser: null });
+      const errorMessage = error.response?.data?.message || "Error logging in. Please try again.";
+      toast.error(errorMessage);
+      logger.apiError("/auth/login", error);
     } finally {
       set({ isLoggingIn: false });
     }
   },
 
-  signup: async (data) => {
+  signup: async (userData) => {
     try {
       set({ isSigninUp: true });
-      const res = await axiosInstance.post("/auth/register", data);
-      console.log("signup response", res.data.data);
-      set({ authUser: res.data.data });
-      toast.success(res.data.message || "Signup successful");
+      const res = await axiosInstance.post("/auth/register", userData);
+      toast.success(res.data.message || "Account created successfully");
+      logger.info("User signup successful", { email: userData.email });
     } catch (error) {
-      console.error("Signup error", error);
-      toast.error("Error signing up. Please try again.");
-      set({ authUser: null });
+      const errorMessage = error.response?.data?.message || "Error creating account. Please try again.";
+      toast.error(errorMessage);
+      logger.apiError("/auth/register", error);
     } finally {
       set({ isSigninUp: false });
     }
@@ -65,12 +58,13 @@ export const useAuthStore = create((set) => ({
   logout: async () => {
     try {
       const res = await axiosInstance.get("/auth/logout");
-      console.log("logout response", res.data);
       set({ authUser: null });
       toast.success(res.data.message || "Logout successful");
+      logger.info("User logout successful");
     } catch (error) {
-      console.error("Logout error", error);
-      toast.error("Error logging out. Please try again.");
+      const errorMessage = error.response?.data?.message || "Error logging out. Please try again.";
+      toast.error(errorMessage);
+      logger.apiError("/auth/logout", error);
     }
   },
 
@@ -78,11 +72,10 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isSubmitting: true });
       const res = await axiosInstance.post("/auth/forgot-password", email);
-      console.log("forgotPassword response", res.data);
       toast.success(res.data.message || "Reset link sent to your email");
     } catch (error) {
-      console.error("Forgot password error", error);
-      toast.error("Error sending reset link. Please try again.");
+      const errorMessage = error.response?.data?.message || "Error sending reset link. Please try again.";
+      toast.error(errorMessage);
     } finally {
       set({ isSubmitting: false });
     }
@@ -91,16 +84,14 @@ export const useAuthStore = create((set) => ({
   resetPassword: async (data, token) => {
     try {
       set({ isSubmitting: true });
-      console.log("Resetting password with data:", data);
       const res = await axiosInstance.post(
         `/auth/reset-password/${token}`,
         data,
       );
-      console.log("resetPassword response", res.data);
       toast.success(res.data.message || "Password reset successful");
     } catch (error) {
-      console.error("Reset password error", error);
-      toast.error("Error resetting password. Please try again.");
+      const errorMessage = error.response?.data?.message || "Error resetting password. Please try again.";
+      toast.error(errorMessage);
     } finally {
       set({ isSubmitting: false });
     }
@@ -109,11 +100,10 @@ export const useAuthStore = create((set) => ({
   getUserProfile: async () => {
     try {
       const res = await axiosInstance.get(`/auth/profile`);
-      console.log("getUserProfile response", res.data);
       return res.data.data;
     } catch (error) {
-      console.error("Error fetching user profile", error);
-      toast.error("Error fetching user profile. Please try again.");
+      const errorMessage = error.response?.data?.message || "Error fetching user profile. Please try again.";
+      toast.error(errorMessage);
       return null;
     }
   },
@@ -121,12 +111,11 @@ export const useAuthStore = create((set) => ({
     try {
       set({ isUpdating: true });
       const res = await axiosInstance.put(`/auth/update-profile`, data);
-      console.log("updateUserProfile response", res.data);
       set({ authUser: res.data.data });
       toast.success(res.data.message || "Profile updated successfully");
     } catch (error) {
-      console.error("Error updating user profile", error);
-      toast.error("Error updating profile. Please try again.");
+      const errorMessage = error.response?.data?.message || "Error updating profile. Please try again.";
+      toast.error(errorMessage);
     } finally {
       set({ isUpdating: false });
     }

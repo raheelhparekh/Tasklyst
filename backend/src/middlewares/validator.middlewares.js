@@ -3,8 +3,6 @@ import {ApiError} from "../utils/api-errors.js"
 
 export const validate = (req, res, next) => {
   const errors = validationResult(req);
-  //TODO: print errors
-  console.log("errors occured", errors.array())
 
   // no errors move forward
   if (errors.isEmpty) {

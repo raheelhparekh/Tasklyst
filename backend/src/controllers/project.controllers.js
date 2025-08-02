@@ -7,6 +7,7 @@ import { Task } from "../models/task.models.js";
 import { User } from "../models/user.models.js";
 import { Note } from "../models/note.models.js";
 import { UserRolesEnums } from "../utils/constants.js";
+import logger from "../utils/logger.js";
 import mongoose from "mongoose";
 
 // Helper function to validate ObjectId
@@ -96,8 +97,11 @@ const createProject = asyncHandler(async (req, res) => {
   });
 
   if (existingProject) {
+    logger.warn(`Duplicate project creation attempt: ${nameTrimmed} by user: ${req.user.email}`);
     throw new ApiError(400, "Project with this name already exists.");
   }
+
+  logger.info(`Creating new project: ${nameTrimmed} by user: ${req.user.email}`);
 
   const projectCreated = await Project.create({
     name: nameTrimmed,
@@ -203,7 +207,6 @@ const addMemberToProject = asyncHandler(async (req, res) => {
   const { id: projectId } = req.params;
 
   const user = req.user;
-  console.log("User adding member:", user);
 
   if (!email || !projectId) {
     throw new ApiError(400, "Please provide email and projectId");

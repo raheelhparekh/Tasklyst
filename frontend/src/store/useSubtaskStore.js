@@ -9,19 +9,16 @@ export const useSubtaskStore = create((set) => ({
   createSubtask: async (subtaskData,taskId) => {
     try {
       set({ isCreatingSubtask: true });
-      console.log("Creating subtask with data:", subtaskData, "for taskId:", taskId);
       const response = await axiosInstance.post(
         `/subtask/create-subtask/${taskId}`,
         subtaskData,
       );
-      console.log("Subtask created:", response.data.data);
       set((state) => ({
         subtasks: [...state.subtasks, response.data.data],
       }));
       toast.success("Subtask created successfully");
     } catch (error) {
       toast.error("Failed to create subtask");
-      console.error("Error creating subtask:", error);
     } finally {
       set({ isCreatingSubtask: false });
     }
@@ -33,11 +30,9 @@ export const useSubtaskStore = create((set) => ({
       const response = await axiosInstance.get(
         `/subtask/all-subtasks/${taskId}`,
       );
-      console.log("Subtasks fetched:", response.data.data);
       set({ subtasks: response.data.data });
     } catch (error) {
       toast.error("Failed to fetch subtasks");
-      console.error("Error fetching subtasks:", error);
       set({ subtasks: [] });
     } finally {
       set({ isFetchingSubtasks: false });
@@ -49,14 +44,12 @@ export const useSubtaskStore = create((set) => ({
       const response = await axiosInstance.delete(
         `/subtask/delete-subtask/${subtaskId}`,
       );
-      console.log("Subtask deleted:", response.data);
       set((state) => ({
         subtasks: state.subtasks.filter((subtask) => subtask._id !== subtaskId),
       }));
       toast.success("Subtask deleted successfully");
     } catch (error) {
       toast.error("Failed to delete subtask");
-      console.error("Error deleting subtask:", error);
     }
   },
 
@@ -66,7 +59,6 @@ export const useSubtaskStore = create((set) => ({
         `/subtask/update-subtask/${subtaskId}`,
         updatedData,
       );
-      console.log("Subtask updated:", response.data);
       set((state) => ({
         subtasks: state.subtasks.map((subtask) =>
           subtask._id === subtaskId
@@ -77,7 +69,6 @@ export const useSubtaskStore = create((set) => ({
       toast.success("Subtask updated successfully");
     } catch (error) {
       toast.error("Failed to update subtask");
-      console.error("Error updating subtask:", error);
     }
   },
 }));

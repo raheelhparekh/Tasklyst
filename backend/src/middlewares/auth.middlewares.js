@@ -5,6 +5,7 @@ import { asyncHandler } from "../utils/async-handler.js";
 import { ProjectMember } from "../models/projectmember.models.js";
 import mongoose from "mongoose";
 import { Task } from "../models/task.models.js";
+import logger from "../utils/logger.js";
 
 export const isLoggedIn = async (req, res, next) => {
   try {
@@ -69,7 +70,6 @@ export const isLoggedIn = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    // console.error("Auth middleware error:", err); // Remove in production
     const status = err.statuscode || 500;
     return res.status(status).json({
       success: false,
@@ -85,7 +85,6 @@ export const validateProjectPermission = (roles = []) =>
     // Try to resolve projectId from task/note/subtask if not directly present
     if (!projectId) {
       const taskId  = req.params.taskId;
-      console.log("Task ID:", taskId);
 
       let task;
       if (taskId ) {
@@ -93,7 +92,6 @@ export const validateProjectPermission = (roles = []) =>
         if(!task) {
           throw new ApiError(404, "Task not found with this id");
         }
-        console.log("Task:", task);
       }
 
       if (task?.project) {
@@ -110,7 +108,6 @@ export const validateProjectPermission = (roles = []) =>
       user: new mongoose.Types.ObjectId(req.user.id),
     });
 
-    // console.log("Project Member:", projectMember);
 
     if (!projectMember) {
       throw new ApiError(403, "You are not a member of this project");

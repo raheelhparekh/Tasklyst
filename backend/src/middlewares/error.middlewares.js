@@ -1,8 +1,22 @@
 import mongoose from "mongoose";
+import logger from "../utils/logger.js";
 
 const errorHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";
+
+  // Log the error with appropriate level
+  if (statusCode >= 500) {
+    logger.error(`${req.method} ${req.url} - ${statusCode} - ${message}`, {
+      error: err.stack,
+      body: req.body,
+      user: req.user?.email
+    });
+  } else {
+    logger.warn(`${req.method} ${req.url} - ${statusCode} - ${message}`, {
+      user: req.user?.email
+    });
+  }
 
   // Handle specific types of errors
   if (err instanceof mongoose.Error.ValidationError) {
@@ -25,9 +39,7 @@ const errorHandler = (err, req, res, next) => {
   }
 
   // Log error for debugging (but don't expose sensitive information)
-  console.error(`Error ${statusCode}: ${message}`);
   if (process.env.NODE_ENV === "development") {
-    console.error(err.stack);
   }
 
   return res.status(statusCode).json({

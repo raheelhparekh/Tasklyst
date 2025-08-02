@@ -7,6 +7,7 @@ import {
 import { User } from "../models/user.models.js";
 import { ApiError } from "../utils/api-errors.js";
 import { ApiResponse } from "../utils/api-response.js";
+import logger from "../utils/logger.js";
 import bcrypt from "bcryptjs";
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -23,11 +24,12 @@ const registerUser = asyncHandler(async (req, res) => {
   // check if user already exists
   const existingUser = await User.findOne({ email: trimmedEmail });
   if (existingUser) {
+    logger.warn(`Registration attempt with existing email: ${trimmedEmail}`);
     throw new ApiError(401, "User already exists. Please login");
   }
 
+  logger.info(`New user registration attempt: ${trimmedEmail}`);
   const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
-  // console.log("hashed pass", hashedPassword);
 
   // create new user
   const newUser = await User.create({
@@ -47,8 +49,6 @@ const registerUser = asyncHandler(async (req, res) => {
   await newUser.save();
 
   // sending email to the user
-  console.log("sending email");
-
   await sendMail({
     email: newUser.email, // ✅ required
     subject: "Verify your email", // ✅ required
@@ -57,8 +57,6 @@ const registerUser = asyncHandler(async (req, res) => {
       `${process.env.BASE_URL}/api/v1/auth/verify-email?token=${unHashedToken}`,
     ),
   });
-
-  console.log("email sent");
 
   return res.status(200).json(
     new ApiResponse(
@@ -82,14 +80,18 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) {
+    logger.warn(`Login attempt with non-existent email: ${email}`);
     throw new ApiError(400, "User does not exist.");
   }
 
   const isPasswordCorrect = await user.isPasswordCorrect(password);
 
   if (!isPasswordCorrect) {
+    logger.warn(`Failed login attempt for user: ${email}`);
     throw new ApiError(400, "Invalid credentials.");
   }
+
+  logger.info(`Successful login for user: ${email}`);
 
   // if (!user.isEmailVerified) {
   //   throw new ApiError(400, "Please verify your email before logging in.");
@@ -136,6 +138,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   if (!user) {
     throw new ApiError(401, "Unauthorized access.");
   }
+
+  logger.info(`User logout: ${user.email}`);
 
   // Clear cookies
   res.clearCookie("refreshToken", {
@@ -211,8 +215,6 @@ const resendVerificationEmail = asyncHandler(async (req, res) => {
   await user.save();
 
   // sending email to the user
-  console.log("sending email");
-
   await sendMail({
     email: user.email, // ✅ required
     subject: "Verify your email", // ✅ required
@@ -249,8 +251,11 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) {
+    logger.warn(`Password reset attempt for non-existent email: ${email}`);
     throw new ApiError(404, "User does not exist with this email");
   }
+
+  logger.info(`Password reset requested for user: ${email}`);
 
   const { hashedToken, unHashedToken, tokenExpiry } =
     await user.generateTemporaryToken();
@@ -261,8 +266,6 @@ const forgotPassword = asyncHandler(async (req, res) => {
   await user.save();
 
   // sending email to the user
-  console.log("sending email");
-
   await sendMail({
     email: user.email, // ✅ required
     subject: "Reset your password", // ✅ required
@@ -271,8 +274,6 @@ const forgotPassword = asyncHandler(async (req, res) => {
       `${process.env.BASE_URL}/reset-password/${unHashedToken}`,
     ),
   });
-
-  console.log("email sent");
 
   return res
     .status(200)
@@ -299,8 +300,11 @@ const resetPassword = asyncHandler(async (req, res) => {
   });
 
   if (!user) {
+    logger.warn(`Password reset attempt with invalid/expired token: ${token}`);
     throw new ApiError(400, "Invalid or expired token.");
   }
+
+  logger.info(`Password reset successful for user: ${user.email}`);
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   user.password = hashedPassword;
@@ -337,7 +341,6 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
   if (req.file && req.file.path) {
     myUser.avatar.url = req.file.path; // Cloudinary URL
-    console.log("Avatar URL:", myUser.avatar.url);
   }
   await myUser.save();
 

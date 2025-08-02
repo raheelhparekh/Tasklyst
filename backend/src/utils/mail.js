@@ -1,5 +1,7 @@
 import Mailgen from "mailgen";
 import nodemailer from "nodemailer";
+import logger from "./logger.js";
+import { ApiError } from "./api-errors.js";
 
 export const sendMail = async (options) => {
   var mailGenerator = new Mailgen({
@@ -37,10 +39,11 @@ export const sendMail = async (options) => {
   };
 
   try {
-    await transporter.sendMail(mail)
+    await transporter.sendMail(mail);
+    logger.info(`Email sent successfully to: ${options.email}`);
   } catch (error) {
-    console.log("error sending emails",error)
-    
+    logger.error(`Failed to send email to ${options.email}:`, error);
+    throw new ApiError(500, "Failed to send email");
   }
 };
 

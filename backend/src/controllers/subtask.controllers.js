@@ -9,7 +9,6 @@ const createSubtask = asyncHandler(async (req, res) => {
     const { taskId } = req.params;
     const { title } = req.body;
     const user = req.user;
-    console.log("this subtask is created by user name:", user.username);
 
     if (!title || !taskId) {
       throw new ApiError(400, "Title, Task are required fields.");
@@ -26,7 +25,6 @@ const createSubtask = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, subtask, "Subtask created successfully"));
   } catch (error) {
-    console.error("Error creating subtask:", error);
     throw new ApiError(500, "Internal server error while creating subtask.");
   }
 });
@@ -45,7 +43,6 @@ const getAllSubtasks = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, subtasks, "Subtasks fetched successfully"));
   } catch (error) {
-    console.error("Error fetching subtasks:", error);
     throw new ApiError(500, "Internal server error while fetching subtasks.");
   }
 });
@@ -54,7 +51,6 @@ const getAllSubtasks = asyncHandler(async (req, res) => {
 const getSubtaskById = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
-    console.log("Subtask ID:", id);
 
     // Fetch the subtask by its ID
     const subtask = await SubTask.findById(id).populate(
@@ -70,7 +66,6 @@ const getSubtaskById = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, subtask, "Subtask fetched successfully"));
   } catch (error) {
-    console.error("Error fetching subtask by ID:", error);
     throw new ApiError(
       500,
       "Internal server error while fetching subtask by ID.",
@@ -99,7 +94,6 @@ const updateSubtask = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, subtask, "Subtask updated successfully"));
   } catch (error) {
-    console.error("Error updating subtask:", error);
     throw new ApiError(500, "Internal server error while updating subtask.");
   }
 });
@@ -123,7 +117,6 @@ const deleteSubtask = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, null, "Subtask deleted successfully"));
   } catch (error) {
-    console.error("Error deleting subtask:", error);
     throw new ApiError(500, "Internal server error while deleting subtask.");
   }
 });

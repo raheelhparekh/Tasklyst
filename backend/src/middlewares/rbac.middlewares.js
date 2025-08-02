@@ -15,14 +15,10 @@ export const getUserProjectRole = async (userId, projectId) => {
     const userIdStr = userId.toString();
     const projectIdStr = projectId.toString();
 
-    console.log("getUserProjectRole called:", { userIdStr, projectIdStr });
-
     // Check if user is the project creator (automatically project_admin)
     const project = await Project.findById(projectIdStr);
-    console.log("Project found:", project ? { createdBy: project.createdBy.toString() } : "null");
     
     if (project && project.createdBy.toString() === userIdStr) {
-      console.log("User is project creator - returning PROJECT_ADMIN");
       return UserRolesEnums.PROJECT_ADMIN;
     }
 
@@ -31,17 +27,13 @@ export const getUserProjectRole = async (userId, projectId) => {
       user: userIdStr,
       project: projectIdStr
     });
-    console.log("Member found:", member ? { role: member.role } : "null");
 
     if (member) {
-      console.log("Returning member role:", member.role);
       return member.role;
     }
 
-    console.log("No role found - returning null");
     return null;
   } catch (error) {
-    console.error("Error getting user project role:", error);
     return null;
   }
 };
@@ -219,14 +211,12 @@ export const checkMemberManagementPermission = (permission) => {
       const userId = req.user.id;
       const projectId = req.params.id || req.params.projectId;
 
-      console.log("checkMemberManagementPermission called:", { userId, projectId, permission });
 
       if (!projectId) {
         throw new ApiError(400, "Project ID is required");
       }
 
       const userRole = await getUserProjectRole(userId, projectId);
-      console.log("User role found:", userRole);
       
       if (!userRole) {
         throw new ApiError(403, "You are not a member of this project");
@@ -234,7 +224,6 @@ export const checkMemberManagementPermission = (permission) => {
 
       // Only admins and project_admins can manage members
       const hasRequiredPermission = hasPermission(userRole, permission);
-      console.log("Permission check:", { userRole, permission, hasRequiredPermission });
       
       if (!hasRequiredPermission) {
         throw new ApiError(403, "You don't have permission to manage project members");
@@ -243,7 +232,6 @@ export const checkMemberManagementPermission = (permission) => {
       req.userProjectRole = userRole;
       next();
     } catch (error) {
-      console.error("Error in checkMemberManagementPermission:", error);
       next(error);
     }
   };
@@ -259,7 +247,6 @@ export const checkMemberLevelPermission = (permission) => {
       const userId = req.user.id;
       const memberId = req.params.id;
 
-      console.log("checkMemberLevelPermission called:", { userId, memberId, permission });
 
       if (!memberId) {
         throw new ApiError(400, "Member ID is required");
@@ -272,10 +259,8 @@ export const checkMemberLevelPermission = (permission) => {
       }
 
       const projectId = member.project;
-      console.log("Found project ID from member:", projectId);
 
       const userRole = await getUserProjectRole(userId, projectId);
-      console.log("User role found:", userRole);
       
       if (!userRole) {
         throw new ApiError(403, "You are not a member of this project");
@@ -283,7 +268,6 @@ export const checkMemberLevelPermission = (permission) => {
 
       // Only admins and project_admins can manage members
       const hasRequiredPermission = hasPermission(userRole, permission);
-      console.log("Permission check:", { userRole, permission, hasRequiredPermission });
       
       if (!hasRequiredPermission) {
         throw new ApiError(403, "You don't have permission to manage project members");
@@ -293,7 +277,6 @@ export const checkMemberLevelPermission = (permission) => {
       req.targetMember = member; // Pass the member info to the controller
       next();
     } catch (error) {
-      console.error("Error in checkMemberLevelPermission:", error);
       next(error);
     }
   };

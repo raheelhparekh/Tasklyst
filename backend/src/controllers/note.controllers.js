@@ -27,7 +27,6 @@ const getProjectNotes = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200,  notes, "Notes retrieved successfully"));
   } catch (error) {
-    console.error("Error getting notes:", error);
     throw new ApiError(500, "Internal server error while getting notes.");
   }
 });
@@ -52,7 +51,6 @@ const getNoteById = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, note, "Note retrieved successfully" ));
   } catch (error) {
-    console.error("Error getting note by ID:", error);
     throw new ApiError(500, "Internal server error while getting note by ID.");
   }
 });
@@ -98,7 +96,6 @@ const createNote = asyncHandler(async (req, res) => {
       new ApiResponse(200, createdNote, "Note created successfully")
     );
   } catch (error) {
-    console.error("Error creating note:", error);
     throw new ApiError(500, "Internal server error while creating note.");
   }
 });
@@ -128,7 +125,6 @@ const updateNote = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200,  updatedNote, "Note updated successfully"));
   
     } catch (error) {
-    console.error("Error updating note:", error);
     throw new ApiError(500, "Internal server error while updating note.");
   }
 });
@@ -152,7 +148,6 @@ const deleteNote = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, "Note deleted successfully"));
   
     } catch (error) {
-    console.error("Error deleting note:", error);
     throw new ApiError(500, "Internal server error while deleting note.");
   }
 });
@@ -165,7 +160,6 @@ const getTaskNotes= asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, notes, "Notes of task retrieved successfully"));
   } catch (error) {
-    console.error("Error getting notes:", error);
     throw new ApiError(500, "Internal server error while getting notes.");
   }
 });
