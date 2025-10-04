@@ -14,17 +14,34 @@ export const useTaskStore = create((set) => ({
   isDeletingTask: false,
   isFetchingTaskById: false,
 
-  createTask: async (taskData) => {
+  createTask: async (taskData,id) => {
     try {
       set({ isLoading: true });
-      const res = await axiosInstance.post("/task", taskData, {
+      const res = await axiosInstance.post(`/task/create-task/${id}`, taskData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
+      // Get the new task's status
+      const newTask = res.data.data;
+      const taskStatus = newTask.status || "todo";
+      
+      // Update the appropriate task list based on status
+      set((state) => {
+        if (taskStatus === "todo") {
+          return { todoTasks: [...state.todoTasks, newTask] };
+        } else if (taskStatus === "in_progress") {
+          return { in_progress: [...state.in_progress, newTask] };
+        } else if (taskStatus === "completed") {
+          return { completedTasks: [...state.completedTasks, newTask] };
+        }
+        return state;
+      });
+
+      // Update the overall tasks list
       set((state) => ({
-        tasks: [...state.tasks, res.data.data],
+        tasks: [...state.tasks, newTask],
       }));
 
       toast.success(res.data.message || "Task created successfully");

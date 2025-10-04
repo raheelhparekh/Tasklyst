@@ -7,9 +7,9 @@ import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-w
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import KanbanSection from "@/components/sections/KanbanSection";
-import FeaturesSection from "@/components/sections/FeaturesSection";
-import CallToActionSection from "@/components/sections/CallToActionSection";
+import KanbanSection from "@/components/sections_heropage/KanbanSection";
+import FeaturesSection from "@/components/sections_heropage/FeaturesSection";
+import CallToActionSection from "@/components/sections_heropage/CallToActionSection";
 
 export default function HomePage() {
   const navigate = useNavigate();

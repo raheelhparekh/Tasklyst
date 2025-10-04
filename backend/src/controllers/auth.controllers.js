@@ -139,6 +139,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Unauthorized access.");
   }
 
+  const isProduction = process.env.NODE_ENV === "production";
+  
   logger.info(`User logout: ${user.email}`);
 
   // Clear cookies

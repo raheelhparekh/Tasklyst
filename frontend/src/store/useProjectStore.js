@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import { toast } from "sonner";
@@ -93,7 +94,7 @@ export const useProjectStore = create((set) => ({
         set((state) => ({
           projects: [...state.projects, newProjectWithMembers],
         }));
-      } catch (memberError) {
+      } catch (err) {
         // Still add the project but with default member count
         const newProjectWithMembers = {
           ...newProject,
@@ -249,6 +250,12 @@ export const useProjectStore = create((set) => ({
             : project,
         ),
       }));
+
+      // Fetch updated members list
+      const membersRes = await axiosInstance.get(
+        `/project/get-all-members-details/${projectId}`
+      );
+      set({ members: membersRes.data.data });
       
       toast.success(res.data.message || "Member added to project successfully");
       

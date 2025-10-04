@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 import app from "./app.js";
 import connectDb from "./db/db.js";
-import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import cookieParser from "cookie-parser";
 import logger from "./utils/logger.js";
 
 import authRoutes from "./routes/auth.routes.js";
@@ -32,16 +32,7 @@ if (missingEnvVars.length > 0) {
   process.exit(1);
 }
 
-// const allowedOrigins =
-//   process.env.NODE_ENV === "production"
-//     ? [
-//         process.env.BASE_URL,
-//         "https://tasklyst-one.vercel.app", // Main domain
-//         /^https:\/\/tasklyst.*\.vercel\.app$/, // Any tasklyst deployment
-//         /^https:\/\/.*-raheelhparekhs-projects\.vercel\.app$/ // Your project deployments
-//       ]
-//     : ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"];
-
+// CORS configuration
 app.use(
   cors({
     origin: process.env.NODE_ENV === "production" 
@@ -62,11 +53,10 @@ app.use(
   }),
 );
 
-app.use(express.json()); // accepts json values
+// Middleware setup
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-// Request logging middleware
 app.use(requestLogger);
 
 // Security headers
@@ -78,15 +68,17 @@ app.use((req, res, next) => {
   next();
 });
 
-const PORT = process.env.PORT || 8000;
-
+// Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/project", projectRoutes);
 app.use("/api/v1/note", noteRoutes);
 app.use("/api/v1/task", taskRoutes);
 app.use("/api/v1/subtask", subtaskRoutes);
 
+// Error handling
 app.use(errorHandler);
+
+const PORT = process.env.PORT || 8000;
 
 connectDb()
   .then(() => {
