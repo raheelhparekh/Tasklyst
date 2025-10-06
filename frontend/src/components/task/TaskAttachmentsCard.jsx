@@ -192,9 +192,9 @@ export default function TaskAttachmentsCard({ task }) {
           </div>
         ) : (
           <div className="text-center py-8">
-            <div className="p-4 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            {/* <div className="p-4 rounded-full bg-gradient-to-r from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
               <FileIcon className="h-8 w-8 text-violet-500" />
-            </div>
+            </div> */}
             <p className="text-sm text-muted-foreground">
               No attachments yet. Upload files to get started.
             </p>
